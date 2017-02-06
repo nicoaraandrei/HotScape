@@ -14,17 +14,21 @@ function render() {
 
 function changePOV (pers) {
 	switch (pers) {
-		case 1:
+		case 1: // 1st person
 			camera.position.set (0, 0, 0);
 		break;
 
 		default:
-		case 2:
-			camera.position.set (1, 0.75, 1.5);
+		case 2: // 2nd person / shoulder view
+			camera.position.set (0.75, 0.75, 0.75);
 		break;
 
-		case 3:
+		case 3: // 3rd person
 			camera.position.set (2, 1, 2);
+		break;
+		
+		case 4: // bird-ish view
+			camera.position.set (1.25, 1.75, 1.75);
 		break;
 	}
 }
