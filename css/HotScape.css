@@ -2,3 +2,10 @@ body {
 	margin: 0;
 	overflow: hidden; // for that 1 pixel that will trigger the scrollbars
 }
+
+* { // disable selection
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
