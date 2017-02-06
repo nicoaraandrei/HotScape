@@ -3,7 +3,7 @@ var camera = new THREE.PerspectiveCamera (
 	120, // FOV
 	window.innerWidth / window.innerHeight, // aspect ratio
 	0.1, // near
-	1000 // far
+	50 // far
 );
 var renderer = new THREE.WebGLRenderer();
 
@@ -15,7 +15,7 @@ function render() {
 function changePOV (pers) {
 	switch (pers) {
 		case 1: // 1st person
-			camera.position.set (0, 0, 0);
+			camera.position.set (0, 0.75, -0.15);
 		break;
 
 		default:
