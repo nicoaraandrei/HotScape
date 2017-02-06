@@ -24,7 +24,7 @@ function changePOV (pers) {
 		break;
 
 		case 3:
-			camera.position.set (1, 0.75, 1.5);
+			camera.position.set (2, 1, 2);
 		break;
 	}
 }
