@@ -4,7 +4,6 @@ var playerGeometry, playerMaterial, player;
 function init() {
 	setupThreeJS();
 	setupWorld();
-	
 }
 
 function setupThreeJS() {
@@ -30,18 +29,18 @@ function setupWorld() {
 	});
 	player = new THREE.Mesh (playerGeometry, playerMaterial);
 	scene.add (player);
-	changePOV (3);  
+	changePOV (3);
 }
 
 function setupPlatform() {
-	var geo = new THREE.PlaneGeometry(10,30);
-	var mat = new THREE.MeshBasicMaterial({
-		color: "rgb(255,0,0)", 
+	var geo = new THREE.PlaneGeometry (10,30);
+	var mat = new THREE.MeshBasicMaterial ({
+		color: "rgb(255, 0, 0)",
 		wireframe: true});
-	var mesh = new THREE.Mesh(geo, mat);
-	mesh.translateY(-2.0);
-	mesh.rotation.x = -90*Math.PI/180;
-	scene.add(mesh);
+	var mesh = new THREE.Mesh (geo, mat);
+	mesh.translateY (-2.0);
+	mesh.rotation.x = -90 * Math.PI / 180;
+	scene.add (mesh);
 }
 
 function render() {
