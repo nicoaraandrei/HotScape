@@ -2,6 +2,12 @@ var scene, camera, renderer;
 var playerGeometry, playerMaterial, player;
 
 function init() {
+	setupThreeJS();
+	setupWorld();
+	
+}
+
+function setupThreeJS() {
 	scene = new THREE.Scene();
 	camera = new THREE.PerspectiveCamera (
 		120, // FOV
@@ -10,13 +16,32 @@ function init() {
 		50 // far
 	);
 	renderer = new THREE.WebGLRenderer();
+	renderer.setSize (window.innerWidth, window.innerHeight);
+	document.body.appendChild (renderer.domElement);
+}
 
-	playerGeometry = new THREE.BoxGeometry (0.75, 1.77, 0.5); // width, height, depth
+function setupWorld() {
+	setupPlatform();
+
+  	playerGeometry = new THREE.BoxGeometry (0.75, 1.77, 0.5); // width, height, depth
 	playerMaterial = new THREE.MeshBasicMaterial ({
 		color: 0x223355,
 		wireframe: true
 	});
 	player = new THREE.Mesh (playerGeometry, playerMaterial);
+	scene.add (player);
+	changePOV (3);  
+}
+
+function setupPlatform() {
+	var geo = new THREE.PlaneGeometry(10,30);
+	var mat = new THREE.MeshBasicMaterial({
+		color: "rgb(255,0,0)", 
+		wireframe: true});
+	var mesh = new THREE.Mesh(geo, mat);
+	mesh.translateY(-2.0);
+	mesh.rotation.x = -90*Math.PI/180;
+	scene.add(mesh);
 }
 
 function render() {
@@ -47,12 +72,6 @@ function changePOV (pers) {
 
 function main() {
 	init ();
-
-	renderer.setSize (window.innerWidth, window.innerHeight);
-	document.body.appendChild (renderer.domElement);
-
-	scene.add (player);
-	changePOV (2);
 
 	render();
 }
