@@ -1,11 +1,23 @@
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera (
-	120, // FOV
-	window.innerWidth / window.innerHeight, // aspect ratio
-	0.1, // near
-	50 // far
-);
-var renderer = new THREE.WebGLRenderer();
+var scene, camera, renderer;
+var playerGeometry, playerMaterial, player;
+
+function init() {
+	scene = new THREE.Scene();
+	camera = new THREE.PerspectiveCamera (
+		120, // FOV
+		window.innerWidth / window.innerHeight, // aspect ratio
+		0.1, // near
+		50 // far
+	);
+	renderer = new THREE.WebGLRenderer();
+
+	playerGeometry = new THREE.BoxGeometry (0.75, 1.77, 0.5); // width, height, depth
+	playerMaterial = new THREE.MeshBasicMaterial ({
+		color: 0x223355,
+		wireframe: true
+	});
+	player = new THREE.Mesh (playerGeometry, playerMaterial);
+}
 
 function render() {
 	requestAnimationFrame (render);
@@ -33,14 +45,9 @@ function changePOV (pers) {
 	}
 }
 
-var playerGeometry = new THREE.BoxGeometry (0.75, 1.77, 0.5); // width, height, depth
-var playerMaterial = new THREE.MeshBasicMaterial ({
-	color: 0x223355,
-	wireframe: true
-});
-var player = new THREE.Mesh (playerGeometry, playerMaterial);
-
 function main() {
+	init ();
+
 	renderer.setSize (window.innerWidth, window.innerHeight);
 	document.body.appendChild (renderer.domElement);
 
