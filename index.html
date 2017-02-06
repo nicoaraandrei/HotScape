@@ -16,7 +16,16 @@
 	<body>
 		<script src="js/three.min.js"></script>
 		<script>
-			
+			var scene = new THREE.Scene();
+			var camera = new THREE.PerspectiveCamera (
+				90, // FOV
+				window.innerWidth / window.innerHeight, // aspect ratio
+				0.1, // near
+				1000 // far
+			);
+			var renderer = new THREE.WebGLRenderer();
+			renderer.setSize (window.innerWidth, window.innerHeight);
+			document.body.appendChild (renderer.domElement);
 		</script>
 	</body>
 </html>
