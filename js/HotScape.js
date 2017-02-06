@@ -34,11 +34,8 @@ function setupWorld() {
 
 function setupPlatform() {
 	var platformGeometry = new THREE.PlaneGeometry (10, 30);
-	var platformMaterial = new THREE.MeshBasicMaterial ({
-		color: "rgb(255, 0, 0)",
-		wireframe: false
-	});
-	var platform = new THREE.Mesh (geo, mat);
+	var platformMaterial = new THREE.MeshBasicMaterial ({color: "rgb(255, 0, 0)"});
+	var platform = new THREE.Mesh (platformGeometry, platformMaterial);
 	platform.translateY (-2.0);
 	platform.rotation.x = -90 * Math.PI / 180;
 	scene.add (platform);
