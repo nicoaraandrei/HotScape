@@ -6,8 +6,11 @@ var camera = new THREE.PerspectiveCamera (
 	1000 // far
 );
 var renderer = new THREE.WebGLRenderer();
-renderer.setSize (window.innerWidth, window.innerHeight);
-document.body.appendChild (renderer.domElement);
+
+function render() {
+	requestAnimationFrame (render);
+	renderer.render (scene, camera);
+}
 
 function changePOV (pers) {
 	switch (pers) {
@@ -21,7 +24,7 @@ function changePOV (pers) {
 		break;
 
 		case 3:
-			//
+			camera.position.set (1, 0.75, 1.5);
 		break;
 	}
 }
@@ -33,11 +36,12 @@ var playerMaterial = new THREE.MeshBasicMaterial ({
 });
 var player = new THREE.Mesh (playerGeometry, playerMaterial);
 
-scene.add (player);
+function main() {
+	renderer.setSize (window.innerWidth, window.innerHeight);
+	document.body.appendChild (renderer.domElement);
 
-function render() {
-	requestAnimationFrame (render);
-	renderer.render (scene, camera);
+	scene.add (player);
+	changePOV (2);
+
+	render();
 }
-
-render();
