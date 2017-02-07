@@ -75,27 +75,6 @@ function update() {
 	camera.lookAt (player.position);
 }
 
-function changePOV (pers) {
-	switch (pers) {
-		case 1: // 1st person
-			camera.position.set (0, 0.75, -0.15);
-		break;
-
-		default:
-		case 2: // 2nd person / shoulder view
-			camera.position.set (0.75, 0.75, 0.75);
-		break;
-
-		case 3: // 3rd person
-			camera.position.set (2, 1, 1.75);
-		break;
-		
-		case 4: // bird-ish view
-			camera.position.set (1, 1.5, 1.75);
-		break;
-	}
-}
-
 function main() {
 	init ();
 }
