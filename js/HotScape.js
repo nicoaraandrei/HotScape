@@ -39,14 +39,12 @@ function setupWorld() {
 }
 
 function setupPlatform() {
-	var geo = new THREE.PlaneGeometry (10,30);
-	var mat = new THREE.MeshBasicMaterial ({
-		color: "rgb(255, 0, 0)",
-		wireframe: true});
-	var mesh = new THREE.Mesh (geo, mat);
-	mesh.translateY (-2.0);
-	mesh.rotation.x = -90 * Math.PI / 180;
-	scene.add (mesh);
+	var platformGeometry = new THREE.PlaneGeometry (10, 30);
+	var platformMaterial = new THREE.MeshBasicMaterial ({color: "rgb(255, 0, 0)"});
+	var platform = new THREE.Mesh (platformGeometry, platformMaterial);
+	platform.translateY (-2.0);
+	platform.rotation.x = -90 * Math.PI / 180;
+	scene.add (platform);
 }
 
 function draw() {
