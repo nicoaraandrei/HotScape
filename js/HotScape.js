@@ -1,9 +1,10 @@
-var scene, camera, renderer;
+var scene, camera, renderer, clock, controls;
 var playerGeometry, playerMaterial, player;
 
 function init() {
 	setupThreeJS();
 	setupWorld();
+	animate();
 }
 
 function setupThreeJS() {
@@ -14,22 +15,27 @@ function setupThreeJS() {
 		0.1, // near
 		50 // far
 	);
+	scene.add(camera);
+	camera.lookAt(scene.position);
 	renderer = new THREE.WebGLRenderer();
 	renderer.setSize (window.innerWidth, window.innerHeight);
+	clock = new THREE.Clock();
+
 	document.body.appendChild (renderer.domElement);
 }
 
 function setupWorld() {
 	setupPlatform();
 
-  	playerGeometry = new THREE.BoxGeometry (0.75, 1.77, 0.5); // width, height, depth
+  	playerGeometry = new THREE.BoxGeometry (0.75, 2, 0.5); // width, height, depth
 	playerMaterial = new THREE.MeshBasicMaterial ({
 		color: 0x223355,
 		wireframe: true
 	});
 	player = new THREE.Mesh (playerGeometry, playerMaterial);
 	scene.add (player);
-	changePOV (3);
+	controls = new KeyboardControls(player);
+	controls.moveSpeed = 2;
 }
 
 function setupPlatform() {
@@ -43,9 +49,25 @@ function setupPlatform() {
 	scene.add (mesh);
 }
 
-function render() {
-	requestAnimationFrame (render);
-	renderer.render (scene, camera);
+function draw() {
+	renderer.render(scene,camera);
+}
+
+function animate() {
+	draw();
+	update();
+	requestAnimationFrame(animate);
+}
+
+function update() {
+	controls.update(clock.getDelta());
+	var relativeCameraOffset = new THREE.Vector3(0,0.3,2);
+	var cameraOffset = player.localToWorld(relativeCameraOffset);
+	camera.position.x = cameraOffset.x;
+	camera.position.y = cameraOffset.y;
+	camera.position.z = cameraOffset.z;
+
+	camera.lookAt( player.position);
 }
 
 function changePOV (pers) {
@@ -71,6 +93,4 @@ function changePOV (pers) {
 
 function main() {
 	init ();
-
-	render();
 }
