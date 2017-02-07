@@ -21,4 +21,19 @@ Player.prototype.constructor = Player;
 
 Player.prototype.getMesh = function () {
 	return this.playerMesh;
-}
+};
+
+Player.prototype.walk = function (direction) {
+	//
+};
+
+Player.prototype.jump = function (distance) {
+	/*
+	if (this.canJump) {
+		distance = distance || this.jumpHeight;
+		var thrust = Math.sqrt(Math.abs(2 * distance * this.acceleration.y));
+		this.velocity.y += thrust;
+		this.canJump = false;
+	}
+	*/
+};
