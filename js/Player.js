@@ -4,7 +4,6 @@ function Player (geom, mat, pos) {
 	this.material = new THREE.MeshBasicMaterial ({
 		color: 0x223355
 	});
-	this.position = new THREE.Vector3();
 
 	if (typeof geom !== 'undefined')
 		this.geometry = geom;
