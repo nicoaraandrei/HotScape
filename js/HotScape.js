@@ -1,4 +1,5 @@
 var scene, camera, renderer, clock, controls, player;
+var relativeCameraOffset;
 
 function init() {
 	setupThreeJS();
@@ -16,6 +17,7 @@ function setupThreeJS() {
 	);
 	scene.add (camera);
 	camera.lookAt (scene.position);
+
 	renderer = new THREE.WebGLRenderer();
 	renderer.setSize (window.innerWidth, window.innerHeight);
 
@@ -33,6 +35,8 @@ function setupWorld() {
 	});
 	player = new THREE.Mesh (playerGeometry, playerMaterial);
 	scene.add (player);
+
+	changePOV (4);
 
 	controls = new Controls (player);
 	controls.moveSpeed = 2;
@@ -64,14 +68,16 @@ function animate() {
 function update() {
 	controls.update (clock.getDelta());
 
-	var relativeCameraOffset = new THREE.Vector3 (0, 0.3, 2);
-	var cameraOffset = player.localToWorld (relativeCameraOffset);
+	var cameraOffset = relativeCameraOffset.clone();
+	player.localToWorld (cameraOffset);
 
 	camera.position.x = cameraOffset.x;
 	camera.position.y = cameraOffset.y;
 	camera.position.z = cameraOffset.z;
 
-	camera.lookAt (player.position);
+	var eyesTo = new THREE.Vector3 (0, 0.5, 0);
+	eyesTo.add (player.position);
+	camera.lookAt (eyesTo);
 }
 
 function main() {
