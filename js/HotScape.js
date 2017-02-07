@@ -18,6 +18,8 @@ function setupThreeJS() {
 	scene.add (camera);
 	camera.lookAt (scene.position);
 
+	relativeCameraOffset = new THREE.Vector3 ();
+
 	renderer = new THREE.WebGLRenderer();
 	renderer.setSize (window.innerWidth, window.innerHeight);
 
