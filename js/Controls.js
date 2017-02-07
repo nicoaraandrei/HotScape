@@ -19,7 +19,7 @@ function changePOV (pers) {
 	}
 }
 
-function KeyboardControls (object, options) {
+function Controls (object, options) {
   this.object = object;
   options = options || {};
   this.domElement = options.domElement || document;
@@ -29,7 +29,7 @@ function KeyboardControls (object, options) {
   this.domElement.addEventListener ('keyup', this.onKeyUp.bind (this), false);
 }
 
-KeyboardControls.prototype = {
+Controls.prototype = {
 	update: function (delta) {
 		var actualMoveSpeed = this.moveSpeed * delta;
 		if (this.moveForward)	this.object.translateZ (-actualMoveSpeed);

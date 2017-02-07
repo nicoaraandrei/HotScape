@@ -1,5 +1,4 @@
-var scene, camera, renderer, clock, controls;
-var player;
+var scene, camera, renderer, clock, controls, player;
 
 function init() {
 	setupThreeJS();
@@ -35,7 +34,7 @@ function setupWorld() {
 	player = new THREE.Mesh (playerGeometry, playerMaterial);
 	scene.add (player);
 
-	controls = new KeyboardControls (player);
+	controls = new Controls (player);
 	controls.moveSpeed = 2;
 }
 
