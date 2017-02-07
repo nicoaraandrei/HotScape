@@ -10,7 +10,7 @@ function changePOV (pers) {
 		break;
 
 		case 3: // 3rd person
-			relativeCameraOffset.set (2, 1, 1.75);
+			relativeCameraOffset.set (1.75, 1, 1.75);
 		break;
 		
 		case 4: // bird-ish view

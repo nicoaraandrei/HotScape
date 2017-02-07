@@ -1,5 +1,5 @@
-var scene, camera, renderer, clock, controls, player;
-var relativeCameraOffset;
+var scene, camera, renderer, relativeCameraOffset;
+var clock, player, controls;
 
 function init() {
 	setupThreeJS();
@@ -18,7 +18,7 @@ function setupThreeJS() {
 	scene.add (camera);
 	camera.lookAt (scene.position);
 
-	relativeCameraOffset = new THREE.Vector3 ();
+	relativeCameraOffset = new THREE.Vector3();
 
 	renderer = new THREE.WebGLRenderer();
 	renderer.setSize (window.innerWidth, window.innerHeight);
@@ -35,7 +35,7 @@ function setupWorld() {
 	var playerMaterial = new THREE.MeshBasicMaterial ({
 		color: 0x223355
 	});
-	player = new THREE.Mesh (playerGeometry, playerMaterial);
+	player = new character (playerGeometry, playerMaterial);
 	scene.add (player);
 
 	changePOV (4);
@@ -51,7 +51,7 @@ function setupPlatform() {
 	});
 	var platform = new THREE.Mesh (platformGeometry, platformMaterial);
 
-	platform.translateY (-2.0);
+	platform.translateY (-2);
 	platform.rotation.x = -90 * Math.PI / 180;
 
 	scene.add (platform);
