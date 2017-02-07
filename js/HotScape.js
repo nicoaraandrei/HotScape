@@ -35,7 +35,7 @@ function setupWorld() {
 	var playerMaterial = new THREE.MeshBasicMaterial ({
 		color: 0x223355
 	});
-	player = new character (playerGeometry, playerMaterial);
+	player = new Player (playerGeometry, playerMaterial);
 	scene.add (player);
 
 	changePOV (4);

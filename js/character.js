@@ -1,22 +1,22 @@
-function character (size, material) {
+function Player (geom, mat) {
 	// public properties
-	this.playerSize = new THREE.BoxGeometry (1, 1, 1);
-	this.playerMaterial = new THREE.MeshBasicMaterial ({
+	this.geometry = new THREE.BoxGeometry (1, 1, 1);
+	this.material = new THREE.MeshBasicMaterial ({
 		color: 0x223355
 	});
-	this.playerPosition;
+	this.position;
 
-	if (typeof size !== 'undefined')
-		this.playerSize = size;
-	if (typeof material !== 'undefined')
-		this.playerMaterialaterial = material;
+	if (typeof geom !== 'undefined')
+		this.geometry = geom;
+	if (typeof mat !== 'undefined')
+		this.material = mat;
 
-	THREE.Mesh.call (this, this.playerSize, this.playerMaterial);
+	THREE.Mesh.call (this, this.geometry, this.material);
 }
 
-character.prototype = Object.create (THREE.Mesh.prototype);
-character.prototype.constructor = character;
+Player.prototype = Object.create (THREE.Mesh.prototype);
+Player.prototype.constructor = Player;
 
-character.prototype.getMesh = function () {
+Player.prototype.getMesh = function () {
 	return this.playerMesh;
 }
