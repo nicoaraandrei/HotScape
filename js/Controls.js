@@ -1,6 +1,9 @@
 var shift = false;
+var lastPOV, currPOV;
 
 function changePOV (pers) {
+	lastPOV = currPOV;
+	currPOV = pers;
 	player.visibile = true;
 	switch (pers) {
 		case 1: // 1st person
@@ -8,15 +11,15 @@ function changePOV (pers) {
 			relativeCameraOffset.set (0, 0.75, 0.25);
 		break;
 
-		default:
 		case 2: // 2nd person / shoulder view
-			relativeCameraOffset.set (0.5, 0.75, 0.5);
+			relativeCameraOffset.set (0.5, 1, 0.5);
 		break;
 
 		case 3: // 3rd person
-			relativeCameraOffset.set (0.75, 1.25, 1.75);
+			relativeCameraOffset.set (0.75, 1.25, 1.5);
 		break;
 		
+		default: currPOV = 4;
 		case 4: // bird-ish view
 			relativeCameraOffset.set (1, 1.5, 1.75);
 		break;
@@ -119,7 +122,7 @@ Controls.prototype = {
 			break;
 
 			case 3: // Right
-			changePOV (1);
+				changePOV (1);
 			break;
 		}
 	},
@@ -133,7 +136,7 @@ Controls.prototype = {
 			break;
 
 			case 3: /*right*/
-			changePOV (4);
+				changePOV (lastPOV);
 			break;
 		}
 	},
