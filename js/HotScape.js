@@ -5,12 +5,13 @@ var clock, player, controls;
 var physicsWorld, collisionConfiguration, dispatcher, solver, broadphase;
 var rigidBodies = [];
 var pos = new THREE.Vector3();
-var quat = new THREE.Quaternion();;
+var quat = new THREE.Quaternion();
 
 function init() {
 	setupThreeJS();
 	setupPhysics();
 	setupWorld();
+	setupPlayer();
 
 	animate();
 }
@@ -48,14 +49,6 @@ function setupWorld() {
 	pos.set (0, -2.0, 0);
 	quat.setFromAxisAngle (new THREE.Vector3 (0, 0, 0), -90 * Math.PI / 180);
 	var platform = createPlatform (40, 1, 40, 0, pos, quat, new THREE.MeshBasicMaterial ({color: 0xff0000}));
-
-	player = new Player();
-	scene.add (player);
-
-	changePOV (4);
-
-	controls = new Controls (player);
-	controls.moveSpeed = 2;
 }
 
 function setupPhysics() {
@@ -67,6 +60,16 @@ function setupPhysics() {
 	physicsWorld = new Ammo.btSoftRigidDynamicsWorld (dispatcher, broadphase, solver, collisionConfiguration, softBodySolver);
 	physicsWorld.setGravity (new Ammo.btVector3 (0, -10, 0));
 	physicsWorld.getWorldInfo().set_m_gravity (new Ammo.btVector3 (0, -10, 0));
+}
+
+function setupPlayer() {
+	player = new Player();
+	scene.add (player);
+
+	changePOV (4);
+
+	controls = new Controls (player);
+	controls.moveSpeed = 2;
 }
 
 function createPlatform (sx, sy, sz, mass, pos, quat, material) {
@@ -129,9 +132,9 @@ function update() {
 	camera.position.y = cameraOffset.y;
 	camera.position.z = cameraOffset.z;
 
-	var eyesTo = new THREE.Vector3 (0, 0.5, 0);
-	eyesTo.add (player.position);
-	camera.lookAt (eyesTo);
+	var eyePos = new THREE.Vector3 (0, 0.5, 0);
+	eyePos.add (player.position);
+	camera.lookAt (eyePos);
 }
 
 function main() {
