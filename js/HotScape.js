@@ -1,5 +1,5 @@
 var renderer, scene, camera, relativeCameraOffset;
-var sun, ambientLight;
+var pSun, cSun;
 var clock, player, controls;
 
 var physicsWorld, collisionConfiguration, dispatcher, solver, broadphase;
@@ -21,6 +21,7 @@ function setupThreeJS() {
 	renderer.setSize (window.innerWidth, window.innerHeight);
 
 	scene = new THREE.Scene();
+
 	camera = new THREE.PerspectiveCamera (
 		120, // FOV
 		window.innerWidth / window.innerHeight, // aspect ratio
@@ -32,13 +33,20 @@ function setupThreeJS() {
 
 	relativeCameraOffset = new THREE.Vector3();
 
-	ambientLight = new THREE.DirectionalLight (0xffffbb, 0.5);
-	ambientLight.position.set (-1, 1, -1);
-	scene.add (ambientLight);
+	// Lights
+		// enable lights
+		renderer.shadowMap.enabled = true;
+		renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-	sun = new THREE.DirectionalLight (0xffffbb, 1);
-	sun.position.set (1, 1, 1);
-	scene.add (sun);
+		// add lights
+		pSun = new THREE.DirectionalLight (0xffffbb, 1);
+		cSun = new THREE.DirectionalLight (0xffffbb, 0.5);
+		pSun.position.set (1, 1, 1);
+		cSun.position.set (-1, 1.5, -1);
+		pSun.castShadow = true;
+		cSun.castShadow = true;
+		scene.add (pSun);
+		scene.add (cSun);
 
 	clock = new THREE.Clock();
 
@@ -48,7 +56,7 @@ function setupThreeJS() {
 function setupWorld() {
 	pos.set (0, -2.0, 0);
 	quat.setFromAxisAngle (new THREE.Vector3 (0, 0, 0), -90 * Math.PI / 180);
-	var platform = createPlatform (40, 1, 40, 0, pos, quat, new THREE.MeshBasicMaterial ({color: 0xff0000}));
+	var platform = createPlatform (40, 1, 40, 0, pos, quat, new THREE.MeshLambertMaterial ({color: 0xff0000}));
 }
 
 function setupPhysics() {
@@ -82,6 +90,8 @@ function createPlatform (sx, sy, sz, mass, pos, quat, material) {
 	var mass = 0;
 
 	createRigidBody (platform, shape, mass, platform.position, platform.quaternion);
+
+	platform.receiveShadow = true;
 
 	scene.add (platform);
 }
