@@ -1,4 +1,5 @@
 var scene, camera, renderer, relativeCameraOffset;
+var sun;
 var clock, player, controls;
 
 var physicsWorld, collisionConfiguration, dispatcher, solver, broadphase;
@@ -29,6 +30,10 @@ function setupThreeJS() {
 
 	renderer = new THREE.WebGLRenderer();
 	renderer.setSize (window.innerWidth, window.innerHeight);
+
+	sun = new THREE.DirectionalLight (0xffffbb, 1);
+	sun.position.set (1, 1, 1);
+	scene.add (sun);
 
 	clock = new THREE.Clock();
 
