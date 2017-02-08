@@ -22,6 +22,8 @@ function setupThreeJS() {
 
 	scene = new THREE.Scene();
 
+	scene.add (new THREE.AxisHelper (10));
+
 	camera = new THREE.PerspectiveCamera (
 		120, // FOV
 		window.innerWidth / window.innerHeight, // aspect ratio
