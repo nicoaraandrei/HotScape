@@ -1,5 +1,7 @@
+var shift = false;
+
 function changePOV (pers) {
-			player.visibile = true;
+	player.visibile = true;
 	switch (pers) {
 		case 1: // 1st person
 			player.visibile = false;
@@ -51,7 +53,10 @@ Controls.prototype = {
 	},
 
 	onKeyDown: function (event) {
-		switch (event.keyCode) {
+		var kC = event.keyCode;
+		if (kC === 16)
+			shift = true;
+		switch (kC) {
 			case 38: // Up
 			case 87: // W
 				this.moveForward = true;
@@ -75,7 +80,10 @@ Controls.prototype = {
 	},
 
 	onKeyUp: function (event) {
-		switch (event.keyCode) {
+		var kC = event.keyCode;
+		if (kC === 16)
+			shift = false;
+		switch (kC) {
 			case 38: // Up
 			case 87: // W
 				this.moveForward = false;
