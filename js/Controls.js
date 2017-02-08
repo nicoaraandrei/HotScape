@@ -20,13 +20,17 @@ function changePOV (pers) {
 }
 
 function Controls (object, options) {
-  this.object = object;
-  options = options || {};
-  this.domElement = options.domElement || document;
-  this.moveSpeed = options.moveSpeed || 100;
+	this.object = object;
+	options = options || {};
+	this.domElement = options.domElement || document;
+	this.moveSpeed = options.moveSpeed || 100;
 
-  this.domElement.addEventListener ('keydown', this.onKeyDown.bind (this), false);
-  this.domElement.addEventListener ('keyup', this.onKeyUp.bind (this), false);
+	this.domElement.addEventListener ('keydown', this.onKeyDown.bind (this), false);
+	this.domElement.addEventListener ('keyup', this.onKeyUp.bind (this), false);
+
+	this.domElement.addEventListener ('contextmenu', event => event.preventDefault());
+	this.domElement.addEventListener ('mousedown', this.onMouseDown.bind (this), false);
+	this.domElement.addEventListener ('mouseup', this.onMouseUp.bind (this), false);
 }
 
 Controls.prototype = {
@@ -73,6 +77,34 @@ Controls.prototype = {
 
 			case 39: /*right*/
 			case 68: /*D*/ this.rotateRight = false; break;
+		}
+	},
+
+	onMouseDown: function (event) {
+		switch (event.which) {
+			case 1: /*left*/
+			break;
+
+			case 2: /*mid*/
+			break;
+
+			case 3: /*right*/
+			changePOV (1);
+			break;
+		}
+	},
+
+	onMouseUp: function (event) {
+		switch (event.which) {
+			case 1: /*left*/
+			break;
+
+			case 2: /*mid*/
+			break;
+
+			case 3: /*right*/
+			changePOV (4);
+			break;
 		}
 	},
 };

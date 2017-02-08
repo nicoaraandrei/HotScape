@@ -18,7 +18,7 @@ function Player (geom, mat, pos) {
 Player.prototype = Object.create (THREE.Mesh.prototype);
 Player.prototype.constructor = Player;
 
-Player.prototype.walk = function (direction) {
+Player.prototype.walk = function () {
 	//
 };
 
