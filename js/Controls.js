@@ -53,10 +53,11 @@ Controls.prototype = {
 	},
 
 	onKeyDown: function (event) {
-		var kC = event.keyCode;
-		if (kC === 16)
-			shift = true;
-		switch (kC) {
+		switch (event.keyCode) {
+			case 16: // Shift
+				shift = true;
+			break;
+
 			case 38: // Up
 			case 87: // W
 				this.moveForward = true;
@@ -80,10 +81,11 @@ Controls.prototype = {
 	},
 
 	onKeyUp: function (event) {
-		var kC = event.keyCode;
-		if (kC === 16)
-			shift = false;
-		switch (kC) {
+		switch (event.keyCode) {
+			case 16: // Shift
+				shift = false;
+			break;
+
 			case 38: // Up
 			case 87: // W
 				this.moveForward = false;
