@@ -2,7 +2,9 @@ function Trap (geom, mat, pos) {
 	// public properties
 	this.geometry = new THREE.BoxGeometry (1, 1, 1);
 	this.material = new THREE.MeshLambertMaterial ({
-		color: 0x223355
+		color: 0x223355,
+		lights: true,
+		fog: true
 	});
 	this.position = new THREE.Vector3();
 

@@ -2,7 +2,9 @@ function Player (geom, mat, pos) {
 	// public properties
 	this.geometry = new THREE.BoxGeometry (0.75, 2, 0.5);
 	this.material = new THREE.MeshLambertMaterial ({
-		color: 0x223355
+		color: 0x223355,
+		lights: true,
+		fog: false
 	});
 
 	if (typeof geom !== 'undefined')
