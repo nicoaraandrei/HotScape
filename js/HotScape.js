@@ -1,4 +1,4 @@
-var scene, camera, renderer, relativeCameraOffset;
+var renderer, scene, camera, relativeCameraOffset;
 var sun, ambientLight;
 var clock, player, controls;
 
@@ -17,6 +17,9 @@ function init() {
 }
 
 function setupThreeJS() {
+	renderer = new THREE.WebGLRenderer();
+	renderer.setSize (window.innerWidth, window.innerHeight);
+
 	scene = new THREE.Scene();
 	camera = new THREE.PerspectiveCamera (
 		120, // FOV
@@ -28,9 +31,6 @@ function setupThreeJS() {
 	camera.lookAt (scene.position);
 
 	relativeCameraOffset = new THREE.Vector3();
-
-	renderer = new THREE.WebGLRenderer();
-	renderer.setSize (window.innerWidth, window.innerHeight);
 
 	ambientLight = new THREE.DirectionalLight (0xffffbb, 0.5);
 	ambientLight.position.set (-1, 1, -1);
