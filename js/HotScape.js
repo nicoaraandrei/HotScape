@@ -76,13 +76,8 @@ function createPlatform(sx, sy, sz, mass, pos, quat, material) {
 	shape.setMargin(0.05);
 	var mass = 0;
 
-<<<<<<< Updated upstream
-	platform.translateY (-2);
-	platform.rotation.x = -90 * Math.PI / 180;
-=======
 	createRigidBody(platform, shape, mass, platform.position, platform.quaternion);
->>>>>>> Stashed changes
-
+	
 	scene.add (platform);
 }
 
