@@ -50,9 +50,9 @@ Controls.prototype = {
 			this.object.translateZ (actualMoveSpeed);
 
 		if (this.rotateLeft)
-			this.object.rotateY (actualMoveSpeed / 1.25);
+			this.object.rotateY (actualMoveSpeed / 1.3);
 		if (this.rotateRight)
-			this.object.rotateY (-actualMoveSpeed / 1.25);
+			this.object.rotateY (-actualMoveSpeed / 1.3);
 	},
 
 	onKeyDown: function (event) {
