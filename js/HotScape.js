@@ -17,7 +17,7 @@ function init() {
 }
 
 function setupThreeJS() {
-	renderer = new THREE.WebGLRenderer();
+	renderer = new THREE.WebGLRenderer ({antialias: false});
 	renderer.setSize (window.innerWidth, window.innerHeight);
 
 	scene = new THREE.Scene();
