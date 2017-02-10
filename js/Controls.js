@@ -1,4 +1,5 @@
 var shift = false;
+var airborne = true;
 var lastPOV, currPOV;
 
 function changePOV (pers) {
@@ -38,6 +39,13 @@ function Controls (object, options) {
 	this.domElement.addEventListener ('contextmenu', event => event.preventDefault());
 	this.domElement.addEventListener ('mousedown', this.onMouseDown.bind (this), false);
 	this.domElement.addEventListener ('mouseup', this.onMouseUp.bind (this), false);
+
+	this.object.addEventListener('collision', function(other_object) {
+		if (other_object.name == "ground") {
+			console.log('mah brotha');
+			airborne = false;
+		}
+	});
 }
 
 Controls.prototype = {
@@ -53,12 +61,25 @@ Controls.prototype = {
 			this.object.rotateY (actualMoveSpeed / 1.3);
 		if (this.rotateRight)
 			this.object.rotateY (-actualMoveSpeed / 1.3);
+
+		if (this.jump) {
+			if(!airborne) {
+				this.object.applyCentralImpulse(new THREE.Vector3(0,100,0));
+				airborne = true;
+			}
+		}
+
+
 	},
 
 	onKeyDown: function (event) {
 		switch (event.keyCode) {
 			case 16: // Shift
 				shift = true;
+			break;
+
+			case 32: // Space
+				this.jump = true;
 			break;
 
 			case 38: // Up
@@ -87,6 +108,10 @@ Controls.prototype = {
 		switch (event.keyCode) {
 			case 16: // Shift
 				shift = false;
+			break;
+
+			case 32: // Space
+				this.jump = false;
 			break;
 
 			case 38: // Up
