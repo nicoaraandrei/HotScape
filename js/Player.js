@@ -12,14 +12,11 @@ function Player (geom, mat, pos) {
 	if (typeof mat !== 'undefined')
 		this.material = mat;
 
-	Physijs.BoxMesh.call (this, this.geometry, this.material, 12);
+	Physijs.BoxMesh.call (this, this.geometry, this.material, 50);
 
 	if (typeof pos !== 'undefined')
 		this.position = pos;
-
 	this.position.y = 20;
-
-
 }
 
 Player.prototype = Object.create (Physijs.BoxMesh.prototype);

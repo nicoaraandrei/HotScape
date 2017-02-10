@@ -1,10 +1,10 @@
-Physijs.scripts.worker = 'js/physijs_worker.js';
+Physijs.scripts.worker = 'lib/physijs_worker.js';
 Physijs.scripts.ammo = 'ammo.js';
-
 
 var renderer, scene, camera, relativeCameraOffset;
 var pSun, cSun;
 var clock, player, controls;
+var ground, obstacle;
 
 var physicsWorld, collisionConfiguration, dispatcher, solver, broadphase;
 var rigidBodies = [];
@@ -23,7 +23,7 @@ function setupThreeJS() {
 	renderer = new THREE.WebGLRenderer ({antialias: false});
 	renderer.setSize (window.innerWidth, window.innerHeight);
 
-	scene = new Physijs.Scene;
+	scene = new Physijs.Scene();
 
 	scene.add (new THREE.AxisHelper (10));
 
@@ -38,26 +38,24 @@ function setupThreeJS() {
 
 	relativeCameraOffset = new THREE.Vector3();
 
-	// Lights
-		// enable lights
-		renderer.shadowMap.enabled = true;
-		renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-		// add lights
-		pSun = new THREE.DirectionalLight (0xffffbb, 1);
-		cSun = new THREE.DirectionalLight (0xffffbb, 0.5);
-		pSun.position.set (1, 1, 1);
-		cSun.position.set (-1, 1.5, -1);
-		pSun.castShadow = true;
-		cSun.castShadow = true;
-		scene.add (pSun);
-		scene.add (cSun);
+	// enable lights
+	renderer.shadowMap.enabled = true;
+	renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+	// add lights
+	pSun = new THREE.DirectionalLight (0xffffbb, 1);
+	cSun = new THREE.DirectionalLight (0xffffbb, 0.5);
+	pSun.position.set (1, 10, 1);
+	cSun.position.set (-1, 10, -1);
+	pSun.castShadow = true;
+	cSun.castShadow = true;
+	scene.add (pSun);
+	scene.add (cSun);
 
 	clock = new THREE.Clock();
 
 	document.body.appendChild (renderer.domElement);
 }
-var obstacle, ground;
+
 function setupWorld() {
 	pos.set (0, 0, 0);
 	quat.setFromAxisAngle (new THREE.Vector3 (0, 0, 0), -90 * Math.PI / 180);
@@ -65,18 +63,17 @@ function setupWorld() {
 	ground = createBox (40, 10, 40, 0, pos, quat, new THREE.MeshLambertMaterial ({color: 0xff0000}));
 	ground.name = "ground";
 	//obstacle
-	pos.set(0, 10, 0);
+	pos.set (0, 10, 0);
 	quat = new THREE.Quaternion();
-	obstacle = createBox (2,2,2,5,pos, quat, new THREE.MeshLambertMaterial({color: 0x0000ff}));
+	obstacle = createBox (2, 2, 2, 5, pos, quat, new THREE.MeshLambertMaterial({color: 0x0000ff}));
 }
-
 
 function setupPlayer() {
 	player = new Player();
 	scene.add (player);
 	//freeze player rotation on X and Z
-	player.setAngularFactor(new THREE.Vector3(0,1,0));
-	//player.setLinearFactor(new THREE.Vector3(1,0,1));
+	player.setAngularFactor (new THREE.Vector3 (0, 1, 0));
+	//player.setLinearFactor (new THREE.Vector3 (1, 0, 1));
 	changePOV (4);
 
 	controls = new Controls (player);
@@ -91,10 +88,8 @@ function createBox (sx, sy, sz, mass, pos, quat, material) {
 	box.receiveShadow = true;
 
 	scene.add (box);
-
 	return box;
 }
-
 
 function draw() {
 	renderer.render (scene, camera);
@@ -103,6 +98,7 @@ function draw() {
 function animate() {
 	draw();
 	update();
+
 	player.__dirtyPosition = true;
 	player.__dirtyRotation = true;
 

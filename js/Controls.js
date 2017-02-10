@@ -5,10 +5,10 @@ var lastPOV, currPOV;
 function changePOV (pers) {
 	lastPOV = currPOV;
 	currPOV = pers;
-	player.visibile = true;
+	player.visible = true;
 	switch (pers) {
 		case 1: // 1st person
-			player.visibile = false;
+			player.visible = false;
 			relativeCameraOffset.set (0, 0.75, 0.25);
 		break;
 
@@ -40,9 +40,9 @@ function Controls (object, options) {
 	this.domElement.addEventListener ('mousedown', this.onMouseDown.bind (this), false);
 	this.domElement.addEventListener ('mouseup', this.onMouseUp.bind (this), false);
 
-	this.object.addEventListener('collision', function(other_object) {
+	this.object.addEventListener ('collision', function(other_object) {
 		if (other_object.name == "ground") {
-			console.log('mah brotha');
+			console.log ('touched ground');
 			airborne = false;
 		}
 	});
@@ -68,8 +68,6 @@ Controls.prototype = {
 				airborne = true;
 			}
 		}
-
-
 	},
 
 	onKeyDown: function (event) {
