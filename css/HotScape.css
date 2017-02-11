@@ -1,11 +1,21 @@
 body {
 	margin: 0;
-	overflow: hidden; // for that 1 pixel that will trigger the scrollbars
+
+	/* dirty fix for that 1 pixel that will trigger the scrollbars */
+	overflow: hidden;
 }
 
-* { // disable selection
+* {	/* disable selection */
+
+	/* Chrome 4-53, Safari 3.1-10.1, Safari TP, Opera 15-40 */
 	-webkit-user-select: none;
+
+	/* Firefox 2-54 */
 	-moz-user-select: none;
+
+	/* IE 10-11, Edge 12-15 */
 	-ms-user-select: none;
+
+	/* Chrome 54-59, Opera 41-44 */
 	user-select: none;
 }
