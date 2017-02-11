@@ -60,16 +60,16 @@ function setupWorld() {
 	pos.set (0, 0, 0);
 	quat.setFromAxisAngle (new THREE.Vector3 (0, 0, 0), -90 * Math.PI / 180);
 	//ground
-	ground = createBox (40, 10, 40, 0, pos, quat, new THREE.MeshLambertMaterial ({color: 0xff0000}));
-	ground.name = "ground";
+	ground = createBox (40, 10, 40, 0, pos, quat, new THREE.MeshLambertMaterial ({color: 0xff0000}), "the ground");
 	//obstacle
 	pos.set (0, 10, 0);
 	quat = new THREE.Quaternion();
-	obstacle = createBox (2, 2, 2, 5, pos, quat, new THREE.MeshLambertMaterial({color: 0x0000ff}));
+	obstacle = createBox (2, 2, 2, 5, pos, quat, new THREE.MeshLambertMaterial({color: 0x0000ff}), "a blue box");
 }
 
 function setupPlayer() {
 	player = new Player();
+	player.name = "Player"; // TODO: name
 	scene.add (player);
 	//freeze player rotation on X and Z
 	player.setAngularFactor (new THREE.Vector3 (0, 1, 0));
@@ -80,11 +80,11 @@ function setupPlayer() {
 	controls.moveSpeed = 2;
 }
 
-function createBox (sx, sy, sz, mass, pos, quat, material) {
+function createBox (sx, sy, sz, mass, pos, quat, material, name) {
 	var box = new Physijs.BoxMesh (new THREE.BoxGeometry (sx, sy, sz, 1, 1, 1), material, mass);
 	box.position.copy (pos);
 	box.quaternion.copy (quat);
-
+	box.name = name || "something";
 	box.receiveShadow = true;
 
 	scene.add (box);

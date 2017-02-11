@@ -40,9 +40,9 @@ function Controls (object, options) {
 	this.domElement.addEventListener ('mousedown', this.onMouseDown.bind (this), false);
 	this.domElement.addEventListener ('mouseup', this.onMouseUp.bind (this), false);
 
-	this.object.addEventListener ('collision', function(other_object) {
-		if (other_object.name == "ground") {
-			console.log ('touched ground');
+	this.object.addEventListener ('collision', function (other_object) {
+		if (object.position.y > other_object.position.y) {
+			console.log (object.name + " touched " + other_object.name + " from above");
 			airborne = false;
 		}
 	});
@@ -64,7 +64,7 @@ Controls.prototype = {
 
 		if (this.jump) {
 			if(!airborne) {
-				this.object.applyCentralImpulse(new THREE.Vector3(0,100,0));
+				this.object.applyCentralImpulse (new THREE.Vector3 (0, 100, 0));
 				airborne = true;
 			}
 		}
