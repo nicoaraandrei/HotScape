@@ -41,7 +41,9 @@ function Controls (object, options) {
 	this.domElement.addEventListener ('mouseup', this.onMouseUp.bind (this), false);
 
 	this.object.addEventListener ('collision', function (other_object) {
-		if (object.position.y - object._physijs.height / 2 + 0.1 >= other_object.position.y + other_object._physijs.height / 2) {
+		console.log (object.position.y - object._physijs.height / 2 + 0.1);
+		console.log (other_object.position.y + other_object._physijs.height / 2);
+		if (object.position.y - object._physijs.height / 2 + 0.2 >= other_object.position.y + other_object._physijs.height / 2) {
 			console.log (object.name + " touched " + other_object.name + " from above");
 			airborne = false;
 		}
