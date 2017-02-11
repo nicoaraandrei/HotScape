@@ -19,12 +19,30 @@ function init() {
 	animate();
 }
 
+function setupLights() {
+	renderer.shadowMap.enabled = true;
+	renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+	cSun = new THREE.AmbientLight (0xffffbb, .25);
+	pSun = new THREE.DirectionalLight (0xffffbb, 1);
+	pSun.position.set (40, 40, -30);
+	pSun.castShadow = true;
+	pSun.shadow.camera.top = 50;
+	pSun.shadow.camera.right = 50;
+	pSun.shadow.camera.left = -50;
+	pSun.shadow.camera.bottom = -50;
+
+	scene.add (cSun);
+	scene.add (pSun);
+	scene.add (new THREE.CameraHelper (pSun.shadow.camera));
+}
+
 function setupThreeJS() {
 	renderer = new THREE.WebGLRenderer ({antialias: false});
 	renderer.setSize (window.innerWidth, window.innerHeight);
+	document.body.appendChild (renderer.domElement);
 
 	scene = new Physijs.Scene();
-
 	scene.add (new THREE.AxisHelper (10));
 
 	camera = new THREE.PerspectiveCamera (
@@ -35,25 +53,10 @@ function setupThreeJS() {
 	);
 	scene.add (camera);
 	camera.lookAt (scene.position);
-
 	relativeCameraOffset = new THREE.Vector3();
-
-	// enable lights
-	renderer.shadowMap.enabled = true;
-	renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-	// add lights
-	pSun = new THREE.DirectionalLight (0xffffbb, 1);
-	cSun = new THREE.DirectionalLight (0xffffbb, 0.5);
-	pSun.position.set (1, 10, 1);
-	cSun.position.set (-1, 10, -1);
-	pSun.castShadow = true;
-	cSun.castShadow = true;
-	scene.add (pSun);
-	scene.add (cSun);
+	setupLights();
 
 	clock = new THREE.Clock();
-
-	document.body.appendChild (renderer.domElement);
 }
 
 function setupWorld() {
@@ -69,6 +72,8 @@ function setupWorld() {
 
 function setupPlayer() {
 	player = new Player();
+	player.receiveShadow = true;
+	player.castShadow = true;
 	player.position.y = 10;
 	player.name = "Player"; // TODO: name
 	scene.add (player);
@@ -87,6 +92,7 @@ function createBox (sx, sy, sz, mass, pos, quat, material, name) {
 	box.quaternion.copy (quat);
 	box.name = name || "something";
 	box.receiveShadow = true;
+	box.castShadow = true;
 
 	scene.add (box);
 	return box;
