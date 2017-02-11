@@ -5,6 +5,8 @@ var lastPOV, currPOV;
 function changePOV (pers) {
 	lastPOV = currPOV;
 	currPOV = pers;
+	if (lastPOV === currPOV)
+		lastPOV = 0;
 	player.visible = true;
 	switch (pers) {
 		case 1: // 1st person
