@@ -62,13 +62,14 @@ function setupWorld() {
 	//ground
 	ground = createBox (40, 10, 40, 0, pos, quat, new THREE.MeshLambertMaterial ({color: 0xff0000}), "the ground");
 	//obstacle
-	pos.set (0, 10, 0);
+	pos.set (0, 6, 0);
 	quat = new THREE.Quaternion();
-	obstacle = createBox (2, 2, 2, 5, pos, quat, new THREE.MeshLambertMaterial({color: 0x0000ff}), "a blue box");
+	obstacle = createBox (1, 1, 1, 5, pos, quat, new THREE.MeshLambertMaterial ({color: 0x0000ff}), "a blue box");
 }
 
 function setupPlayer() {
 	player = new Player();
+	player.position.y = 10;
 	player.name = "Player"; // TODO: name
 	scene.add (player);
 	//freeze player rotation on X and Z

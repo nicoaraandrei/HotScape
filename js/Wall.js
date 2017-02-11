@@ -1,5 +1,4 @@
 function Wall (geom, mat, pos) {
-	// public properties
 	this.geometry = new THREE.BoxGeometry (0.5, 2, 10);
 	this.material = new THREE.MeshLambertMaterial ({
 		color: 0x223355,

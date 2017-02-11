@@ -33,7 +33,7 @@ function Controls (object, options) {
 	this.object = object;
 	options = options || {};
 	this.domElement = options.domElement || document;
-	this.moveSpeed = options.moveSpeed || 250; // avg walking speed = 2.5 m/s
+	this.moveSpeed = options.moveSpeed || 250; // avg walking speed: 2.5 m/s
 
 	this.domElement.addEventListener ('keydown', this.onKeyDown.bind (this), false);
 	this.domElement.addEventListener ('keyup', this.onKeyUp.bind (this), false);
@@ -43,9 +43,7 @@ function Controls (object, options) {
 	this.domElement.addEventListener ('mouseup', this.onMouseUp.bind (this), false);
 
 	this.object.addEventListener ('collision', function (other_object) {
-		console.log (object.position.y - object._physijs.height / 2 + 0.1);
-		console.log (other_object.position.y + other_object._physijs.height / 2);
-		if (object.position.y - object._physijs.height / 2 + 0.2 >= other_object.position.y + other_object._physijs.height / 2) {
+		if (object.position.y - object._physijs.height / 2 + 0.25 >= other_object.position.y + other_object._physijs.height / 2) {
 			console.log (object.name + " touched " + other_object.name + " from above");
 			airborne = false;
 		}
@@ -67,8 +65,9 @@ Controls.prototype = {
 			this.object.rotateY (-actualMoveSpeed / 1.3);
 
 		if (this.jump) {
-			if(!airborne) {
-				this.object.applyCentralImpulse (new THREE.Vector3 (0, 100, 0));
+			if (!airborne) {
+				var jumpForce = this.moveForward ? 7: this.moveBackward ? 6 : 5;
+				this.object.applyCentralImpulse (new THREE.Vector3 (0, player.mass * jumpForce, 0));
 				airborne = true;
 			}
 		}
