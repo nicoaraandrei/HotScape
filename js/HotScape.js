@@ -10,6 +10,7 @@ var physicsWorld, collisionConfiguration, dispatcher, solver, broadphase;
 var rigidBodies = [];
 var pos = new THREE.Vector3();
 var quat = new THREE.Quaternion();
+var ah = new THREE.AxisHelper (0.3);
 
 function init() {
 	setupThreeJS();
@@ -43,7 +44,7 @@ function setupThreeJS() {
 	document.body.appendChild (renderer.domElement);
 
 	scene = new Physijs.Scene();
-	scene.add (new THREE.AxisHelper (10));
+	scene.add (ah);
 
 	camera = new THREE.PerspectiveCamera (
 		120, // FOV
@@ -118,14 +119,15 @@ function update() {
 
 	var cameraOffset = relativeCameraOffset.clone();
 	player.localToWorld (cameraOffset);
+	camera.position.copy (cameraOffset);
 
-	camera.position.x = cameraOffset.x;
-	camera.position.y = cameraOffset.y;
-	camera.position.z = cameraOffset.z;
-
-	var eyePos = new THREE.Vector3 (0, 0.5, 0);
-	eyePos.add (player.position);
-	camera.lookAt (eyePos);
+	var aim	= new THREE.Vector3 (-4, 1, -3);
+	aim.multiplyVectors (aim, player.getWorldDirection());
+	aim.add (player.position);
+	aim.addVectors (aim, new THREE.Vector3 (0, 0.7, 0));
+	camera.lookAt (aim);
+	ah.position.copy (aim);
+	ah.rotation.copy (player.rotation);
 }
 
 function main() {

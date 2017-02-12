@@ -52,13 +52,11 @@ function Controls (object, options) {
 
 Controls.prototype = {
 	update: function (delta) { // aprox 0.01;
-		var actualMoveSpeed = this.moveSpeed * delta;
-
+		var actualMoveSpeed = parseInt (this.moveSpeed * delta * 1000) / 1000;
 		if (this.moveForward)
 			this.object.translateZ (-actualMoveSpeed);
 		if (this.moveBackward)
 			this.object.translateZ (actualMoveSpeed);
-
 		if (this.rotateLeft)
 			this.object.rotateY (actualMoveSpeed / 1.3);
 		if (this.rotateRight)
