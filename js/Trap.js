@@ -5,16 +5,14 @@ function Trap (geom, mat, pos) {
 		lights: true,
 		fog: true
 	});
-	this.position = new THREE.Vector3();
 
 	if (typeof geom !== 'undefined')
 		this.geometry = geom;
 	if (typeof mat !== 'undefined')
 		this.material = mat;
+	THREE.Mesh.call (this, this.geometry, this.material);
 	if (typeof pos !== 'undefined')
 		this.position = pos;
-
-	THREE.Mesh.call (this, this.geometry, this.material);
 }
 
 Trap.prototype = Object.create (THREE.Mesh.prototype);
