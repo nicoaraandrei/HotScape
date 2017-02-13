@@ -11,6 +11,7 @@ window.game.events = function() {
 		keyboard: {
 			// Will be used in game.core.player.controlKeys
 			keyCodes: {
+				16: "shift",
 				32: "space",
 				65: "a",
 				68: "d",

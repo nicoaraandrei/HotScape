@@ -52,7 +52,8 @@ window.game.core = function () {
 				backward: "s",
 				left: "a",
 				right: "d",
-				jump: "space"
+				jump: "space",
+				shift: "shift"
 			},
 
 			create: function() {
@@ -188,6 +189,10 @@ window.game.core = function () {
 				}
 			},
 			processUserInput: function() {
+				if (_events.keyboard.pressed[_game.player.controlKeys.shift]) {
+					// nothing for now
+				}
+
 				if (_events.keyboard.pressed[_game.player.controlKeys.jump])
 					_game.player.jump();
 
