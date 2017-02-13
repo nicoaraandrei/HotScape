@@ -124,6 +124,8 @@ window.game.core = function () {
 
 				// Collision event listener for the jump mechanism
 				_game.player.rigidBody.addEventListener ("collide", function (event) {
+					if (event.with.tag == "trap")
+						_game.player.checkGameOver (true);
 					// Checks if player's is on ground
 					if (!_game.player.isGrounded)
 						// Ray intersection test to check if player is colliding with an object beneath him
@@ -133,8 +135,6 @@ window.game.core = function () {
 								new CANNON.Vec3 (0, 0, -1)
 							).intersectBody (event.contact.bi).length > 0
 						);
-					if (event.with.tag == "trap")
-						_game.player.checkGameOver (true);
 				});
 
 				//	if (event.with.collisionFilterGroup == _game.GROUP4)
