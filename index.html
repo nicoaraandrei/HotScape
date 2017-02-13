@@ -2,15 +2,66 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<title>HotScape</title>
 		<link rel="stylesheet" type="text/css" href="css/HotScape.css">
-		<script src="lib/three.min.js"></script>
-		<script src="lib/physi.js"></script>
-		<script src="js/HotScape.js"></script>
-		<script src="js/Controls.js"></script>
-		<script src="js/Player.js"></script>
-		<script src="js/Wall.js"></script>
-		<script src="js/Trap.js"></script>
 	</head>
-	<body onload="main()"></body>
+	<body>
+		<div id="game"></div>
+
+		<div id="infobox-intro" class="infobox">
+			<h2>Hotscape instructions:</h2>
+			<p>You can control the player by using the following keys:</p>
+			<p>W &rarr; Forward<br />S &rarr; Backward<br />A &rarr; Left<br />D &rarr; Right<br />SPACE &rarr; Jump</p>
+		</div>
+
+		<div id="infobox-bamboozled" class="infobox">
+			<h2>UHOH! You frickin moron</h2>
+			<p>You just got BEANED<p>
+		</div>
+		<script src="lib/stats.min.js"></script>
+
+		<script src="lib/detector.js"></script>
+		<script src="lib/three.min.js"></script>
+		<script src="lib/cannon.js"></script>
+
+		<script src="js/game.static.js"></script>
+		<script src="js/game.three.js"></script>
+		<script src="js/game.cannon.js"></script>
+		<script src="js/game.events.js"></script>
+		<script src="js/game.helpers.js"></script>
+		<script src="js/game.ui.js"></script>
+		<script src="js/HotScape.js"></script>
+		<script src="js/game.models.js"></script> 
+
+		<script>
+			if (!Detector.webgl) {
+				Detector.addGetWebGLMessage();
+			} else {
+				window.gameInstance = window.game.core();
+				window.gameInstance.init({
+					domContainer: document.querySelector("#game"),
+					rendererClearColor: window.game.static.white
+				});
+			}
+
+			// STATS VIA MONKEY PATCH
+			(function() {
+				var gameLoop = window.gameInstance.loop;
+				var stats = new Stats();
+
+				stats.domElement.style.position = "absolute";
+				stats.domElement.style.left = "0px";
+				stats.domElement.style.top = "0px";
+
+				document.body.appendChild( stats.domElement );
+
+				window.gameInstance.loop = function() {
+					stats.begin();
+					gameLoop();
+					stats.end();
+				}
+			})();
+		</script>
+	</body>
 </html>
