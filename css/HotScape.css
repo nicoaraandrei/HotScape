@@ -1,16 +1,8 @@
 * {	/* disable selection */
-
-	/* Chrome 4-53, Safari 3.1-10.1, Safari TP, Opera 15-40 */
-	-webkit-user-select: none;
-
-	/* Firefox 2-54 */
-	-moz-user-select: none;
-
-	/* IE 10-11, Edge 12-15 */
-	-ms-user-select: none;
-
-	/* Chrome 54-59, Opera 41-44 */
-	user-select: none;
+	-webkit-user-select: none; /* Chrome 4-53, Safari 3.1-10.1, Safari TP, Opera 15-40 */
+	-moz-user-select: none; /* Firefox 2-54 */
+	-ms-user-select: none; /* IE 10-11, Edge 12-15 */
+	user-select: none; /* Chrome 54+, Opera 41+ */
 }
 
 html, body {
@@ -25,12 +17,12 @@ html, body {
 .infobox {
 	position: fixed;
 	top: 30px;
-	left: 50%;
-	width: 600px;
-	height: 320px;
+	left: 30px;
+	width: auto;
+	height: auto;
 	padding: 10px 30px;
-	margin: 0 0 0 -300px;
-	background: #ffffff;
+	margin: 0 0 0 0px;
+	background: rgba(255, 255, 255, 0.4);
 	box-sizing: border-box;
 }
 
@@ -40,12 +32,12 @@ html, body {
 
 .fade-out {
 	opacity: 0;
-	transition: opacity 2000ms;
-	-webkit-transition: opacity 2000ms;
+	transition: opacity 500ms;
+	-webkit-transition: opacity 500ms;
 }
 
 .fade-in {
 	opacity: 100 !important;
-	transition: opacity 2000ms;
-	-webkit-transition: opacity 2000ms;
+	transition: opacity 500ms;
+	-webkit-transition: opacity 500ms;
 }
