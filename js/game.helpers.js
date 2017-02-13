@@ -14,19 +14,15 @@ window.game.helpers = {
 			y: vectorLength * Math.sin (vectorDirection)
 		};
 	},
-	// Convert radians to degrees (1 radian = 57.3 degrees => PI * radian = 180 degrees)
-	radToDeg: function (radians) {
+	radToDeg: function (radians) { // (PI * radian = 180 degrees)
 		return radians * (180 / Math.PI);
 	},
-	// Convert degrees to radians
 	degToRad: function (degrees) {
 		return degrees * Math.PI / 180;
 	},
-	// Generate a random number between a fixedrange
 	random: function (min, max, round) {
 		return round ? (Math.floor (Math.random() * (max + 1)) + min) : (Math.random() * max) + min;
 	},
-	// Clone an object recursively
 	cloneObject: function (obj) {
 		var copy;
 

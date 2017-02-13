@@ -12,7 +12,7 @@ window.game.ui = function() {
 		elements: {
 			// Properties for DOM elements are stored here
 			infoboxIntro: null,
-			infoboxBamboozled: null
+			infoboxLost: null
 		},
 
 		// Methods
@@ -26,8 +26,8 @@ window.game.ui = function() {
 		},
 		getElements: function () {
 			// Store the DOM elements in the elements object to make them accessible in addClass, removeClass and hasClass
-			_ui.elements.infoboxIntro = document.querySelector ("#infobox-intro");
-			_ui.elements.infoboxBamboozled = document.querySelector ("#infobox-bamboozled");
+			_ui.elements.infoboxIntro = document.querySelector ("#infoboxIntro");
+			_ui.elements.infoboxLost = document.querySelector ("#infoboxLost");
 		},
 		bindEvents: function () {
 			// Event bindings
@@ -46,7 +46,6 @@ window.game.ui = function() {
 			if (resetClassName && _ui.elements[element].getAttribute ("data-classname")) {
 				_ui.elements[element].className = resetClassName && _ui.elements[element].getAttribute ("data-classname");
 			}
-
 			_ui.elements[element].className = _ui.elements[element].className + " " + className;
 		},
 		removeClass: function (element, className) {
@@ -55,7 +54,7 @@ window.game.ui = function() {
 			_ui.elements[element].className = _ui.elements[element].className.replace (classNameRegEx, "");
 		},
 		hasClass: function (element, className) {
-			// Checksif a specified element contains the given class name
+			// Checks if a specified element contains the given class name
 			return _ui.elements[element].className.match (className);
 		}
 	};

@@ -8,17 +8,14 @@ window.game = window.game || {};
 
 window.game.cannon = function() {
     _cannon = {
-        // Attributes
-
         // Cannon.js world holding all rigid bodies of the level
         world: null,
         // Bodies correspond to the physical objects inside the Cannon.js world
         bodies: [],
         // Visuals are the visual representations of the bodies that are finally rendered by THREE.js
         visuals: [],
-        // Store the body count in an index
+
         bodyCount: 0,
-        // Default friction and restitution
         friction: 0.0,
         restitution: 0.0,
         // Default Z gravity (approximation of 9,806)
@@ -30,7 +27,6 @@ window.game.cannon = function() {
         // Solid material for all other level objects
         solidMaterial: null,
 
-        // Methods
         init: function(three) {
             // A small collision detection extension to get the indices of the collision pair
             _cannon.overrideCollisionMatrixSet();

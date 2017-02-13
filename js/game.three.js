@@ -8,20 +8,16 @@ window.game = window.game || {};
 
 window.game.three = function() {
 	var _three = {
-		// Attributes
-
 		// DOM container which will hold the final canvas element of THREE.js
 		domContainer: null,
 		// Camera size constraint to limit viewport e.g. for a user interface
 		cameraSizeConstraint: null,
-		// Scene, camera and renderer
+
 		camera: null,
 		scene: null,
 		renderer: null,
-		// Field of view default setting for the camera
-		fov: 45,
+		fov: 90,
 
-		// Methods
 		init: function (options) {
 			// Initialize the DOM container from the options or create a new one
 			_three.domContainer = options && options.domContainer || document.createElement ("div");
@@ -49,25 +45,19 @@ window.game.three = function() {
 			// Set the up vector to the Z axis so everything is aligned to the Cannon.js coordinate system
 			_three.camera.up.set (0, 0, 1);
 
-			// Define default WebGL renderer
 			_three.renderer = new THREE.WebGLRenderer ({antialias: true});
 
 			// Set the background color (HTML background will be used if this option is omitted)
 			if (options && typeof options.rendererClearColor === "number")
 				_three.renderer.setClearColor (options.rendererClearColor, 1);
 
-			// Add window resize listener to keep screen size for the canvas
 			_three.onWindowResize();
 			window.addEventListener ("resize", _three.onWindowResize, false);
 
-			// Append the canvas element
 			_three.domContainer.appendChild (_three.renderer.domElement);
 		},
-		destroy: function() {
-
-		},
+		destroy: function() {},
 		setup: function () {
-			// Setup main scene
 			_three.scene = new THREE.Scene();
 
 			// Call lights setup method defined in game.core.js if existing
@@ -75,11 +65,9 @@ window.game.three = function() {
 				_three.setupLights();
 		},
 		render: function() {
-			// Update the scene
 			_three.renderer.render (_three.scene, _three.camera);
 		},
 		onWindowResize: function() {
-			// Keep screen size when window resizes
 			_three.camera.aspect = (window.innerWidth - _three.cameraSizeConstraint.width) / (window.innerHeight - _three.cameraSizeConstraint.height);
 			_three.camera.updateProjectionMatrix();
 			_three.renderer.setSize (
@@ -91,19 +79,14 @@ window.game.three = function() {
 			var meshMaterial;
 			var model = {};
 
-			
 			// Create the Cannon.js geometry for the imported 3D model
 			_three.createCannonGeometry (geometry, scale);
 			// Generate the halfExtents that are needed for Cannon.js
 			model.halfExtents = _three.createCannonHalfExtents (geometry);
 			
 			meshMaterial = new THREE.MeshLambertMaterial (material);
-		
-
-			// Assign the material(s) to the created mesh
 			model.mesh = new THREE.Mesh (geometry, meshMaterial);
 
-			// Return an object containing a mesh and its halfExtents
 			return model;
 
 		},
@@ -141,8 +124,7 @@ window.game.three = function() {
 						// Create a multi-face material
 						meshMaterial = new THREE.MeshFaceMaterial (jsonModel.materials);
 					}
-				} else {
-					// Use and assign the defined material directly
+				} else { // Use and assign the defined material directly
 					meshMaterial = materials;
 				}
 			} else {
@@ -152,14 +134,10 @@ window.game.three = function() {
 				}
 			}
 
-			// Assign the material(s) to the created mesh
 			model.mesh = new THREE.Mesh (jsonModel.geometry, meshMaterial);
-
-			// Return an object containing a mesh and its halfExtents
 			return model;
 		},
 		createCannonGeometry: function (geometry, scale) {
-			// Preparre translation properties
 			var translateX;
 			var translateY;
 			var translateZ;
