@@ -17,9 +17,7 @@ window.game.events = function() {
 				83: "s",
 				87: "w"
 			},
-			pressed: {}, // This object will contain the pressed key states in real-time
-
-			// Methods
+			pressed: {}, // will contain the pressed key in real-time
 			onKeyDown: function (event) {
 				_events.keyboard.pressed[_events.keyboard.keyCodes[event.keyCode]] = true;
 				_events.onKeyDown();
@@ -29,13 +27,34 @@ window.game.events = function() {
 			}
 		},
 
-		// Methods
 		init: function() {
 			document.addEventListener ("keydown", _events.keyboard.onKeyDown, false);
 			document.addEventListener ("keyup", _events.keyboard.onKeyUp, false);
+			document.addEventListener ("contextmenu", event => event.preventDefault());
+			document.addEventListener ("mousedown", _events.keyboard.onMouseDown, false);
+			document.addEventListener ("mouseup", _events.keyboard.onMouseUp, false);
 		},
 		onKeyDown: function() {
-			// No specific actions by default
+		},
+		onMouseDown: function (event) {
+			switch (event.which) {
+				case 1: // left
+				break;
+				case 2: // middle
+				break;
+				case 3: // right
+				break;
+			}
+		},
+		onMouseUp: function (event) {
+			switch (event.which) {
+				case 1: // left
+				break;
+				case 2: // middle
+				break;
+				case 3: // right
+				break;
+			}
 		}
 	};
 
