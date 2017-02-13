@@ -48,7 +48,7 @@ window.game.cannon = function() {
         setup: function() {
             // Create a new physics simulation based on the default settings
             _cannon.world = new CANNON.World();
-            _cannon.world.gravity.set(0, 0, _cannon.gravity);
+            _cannon.world.gravity.set (0, 0, _cannon.gravity);
             _cannon.world.broadphase = new CANNON.NaiveBroadphase();
             _cannon.world.solver.iterations = 5;
 
@@ -61,11 +61,11 @@ window.game.cannon = function() {
             // Override CANNON's collisionMatrixSet for player's "isGrounded" via monkey patch
             var _cannon_collisionMatrixSet = CANNON.World.prototype.collisionMatrixSet;
 
-            CANNON.World.prototype.collisionMatrixSet = function(i, j, value, current) {
-                _cannon_collisionMatrixSet.call(this, i, j, [i, j], current);
+            CANNON.World.prototype.collisionMatrixSet = function (i, j, value, current) {
+                _cannon_collisionMatrixSet.call (this, i, j, [i, j], current);
             };
         },
-        getCollisions: function(index) {
+        getCollisions: function (index) {
             // Count the collisions of the provided index that is connected to a rigid body in the Cannon.js world
             var collisions = 0;
 
@@ -77,7 +77,7 @@ window.game.cannon = function() {
 
             return collisions;
         },
-        bodiesAreInContact(bodyA, bodyB) {
+        bodiesAreInContact (bodyA, bodyB) {
             for (var i = 0; i < _cannon.world.contacts.length; i++) {
                 var c = _cannon.world.contacts[i];
 
@@ -87,36 +87,36 @@ window.game.cannon = function() {
             }
             return false;
         },
-        rotateOnAxis: function(rigidBody, axis, radians) {
+        rotateOnAxis: function (rigidBody, axis, radians) {
             // Equivalent to THREE's Object3D.rotateOnAxis
             var rotationQuaternion = new CANNON.Quaternion();
-            rotationQuaternion.setFromAxisAngle(axis, radians);
-            rigidBody.quaternion = rotationQuaternion.mult(rigidBody.quaternion);
+            rotationQuaternion.setFromAxisAngle (axis, radians);
+            rigidBody.quaternion = rotationQuaternion.mult (rigidBody.quaternion);
         },
-        createRigidBody: function(options) {
+        createRigidBody: function (options) {
             // Creates a new rigid body based on specific options
-            var rigidBody = new CANNON.RigidBody(options.mass, options.shape, options.physicsMaterial);
-            rigidBody.position.set(options.position.x, options.position.y, options.position.z);
+            var rigidBody = new CANNON.RigidBody (options.mass, options.shape, options.physicsMaterial);
+            rigidBody.position.set (options.position.x, options.position.y, options.position.z);
 
             // Apply a rotation if set by using Quaternions
             if (options.rotation) {
-                rigidBody.quaternion.setFromAxisAngle(options.rotation[0], options.rotation[1]);
+                rigidBody.quaternion.setFromAxisAngle (options.rotation[0], options.rotation[1]);
             }
 
             // Add the entity to the scene and world
-            _cannon.addVisual(rigidBody, options.meshMaterial, options.customMesh);
+            _cannon.addVisual (rigidBody, options.meshMaterial, options.customMesh);
             return rigidBody;
         },
-        createPhysicsMaterial: function(material, friction, restitution) {
+        createPhysicsMaterial: function (material, friction, restitution) {
             // Create a new material and add a Cannon ContactMaterial to the world always using _cannon.playerPhysicsMaterial as basis
             var physicsMaterial = material || new CANNON.Material();
-            var contactMaterial = new CANNON.ContactMaterial(physicsMaterial, _cannon.playerPhysicsMaterial, friction || _cannon.friction, restitution || _cannon.restitution);
+            var contactMaterial = new CANNON.ContactMaterial (physicsMaterial, _cannon.playerPhysicsMaterial, friction || _cannon.friction, restitution || _cannon.restitution);
 
-            _cannon.world.addContactMaterial(contactMaterial);
+            _cannon.world.addContactMaterial (contactMaterial);
 
             return physicsMaterial;
         },
-        addVisual: function(body, material, customMesh) {
+        addVisual: function (body, material, customMesh) {
             // Initialize the mesh or use a provided custom mesh
             var mesh = customMesh || null;
 
@@ -127,15 +127,15 @@ window.game.cannon = function() {
 
             // Populate the bodies and visuals arrays
             if (mesh) {
-                _cannon.bodies.push(body);
-                _cannon.visuals.push(mesh);
+                _cannon.bodies.push (body);
+                _cannon.visuals.push (mesh);
 
                 body.visualref = mesh;
                 body.visualref.visualId = _cannon.bodies.length - 1;
 
                 // Add body/mesh to scene/world
-                _three.scene.add(mesh);
-                _cannon.world.add(body);
+                _three.scene.add (mesh);
+                _cannon.world.add (body);
             }
 
             return mesh;
@@ -148,8 +148,8 @@ window.game.cannon = function() {
                 var n = _cannon.bodies.length;
 
                 for (var i = 0; i < n; i++) {
-                    old_b.unshift(_cannon.bodies.pop());
-                    old_v.unshift(_cannon.visuals.pop());
+                    old_b.unshift (_cannon.bodies.pop());
+                    old_v.unshift (_cannon.visuals.pop());
                 }
 
                 var id = body.visualref.visualId;
@@ -165,19 +165,19 @@ window.game.cannon = function() {
                 }
 
                 body.visualref.visualId = null;
-                _three.scene.remove(body.visualref);
+                _three.scene.remove (body.visualref);
                 body.visualref = null;
-                _cannon.world.remove(body);
+                _cannon.world.remove (body);
             }
         },
         removeAllVisuals: function() {
             // Clear the whole physics world and THREE.js scene
-            _cannon.bodies.forEach(function(body) {
+            _cannon.bodies.forEach (function (body) {
                 if (body.visualref) {
                     body.visualref.visualId = null;
-                    _three.scene.remove(body.visualref);
+                    _three.scene.remove (body.visualref);
                     body.visualref = null;
-                    _cannon.world.remove(body);
+                    _cannon.world.remove (body);
                 }
             });
 
@@ -193,48 +193,49 @@ window.game.cannon = function() {
                 var body = _cannon.bodies[i],
                     visual = _cannon.visuals[i];
 
-                body.position.copy(visual.position);
+                body.position.copy (visual.position);
 
                 // Update the Quaternions
                 if (body.quaternion) {
-                    body.quaternion.copy(visual.quaternion);
+                    body.quaternion.copy (visual.quaternion);
                 }
             }
 
             // Perform a simulation step
             //change the timestep for slowmo
-            _cannon.world.step(_cannon.timestep);
+            _cannon.world.step (_cannon.timestep);
         },
-        shape2mesh: function(shape, currentMaterial) {
+        shape2mesh: function (shape, currentMaterial) {
             // Convert a given shape to a THREE.js mesh
-            var mesh;
-            var submesh;
+            var mesh, submesh;
 
             switch (shape.type) {
                 case CANNON.Shape.types.SPHERE:
-                    var sphere_geometry = new THREE.SphereGeometry(shape.radius, shape.wSeg, shape.hSeg);
-                    mesh = new THREE.Mesh(sphere_geometry, currentMaterial);
+                    var sphere_geometry = new THREE.SphereGeometry (shape.radius, shape.wSeg, shape.hSeg);
+                    mesh = new THREE.Mesh (sphere_geometry, currentMaterial);
                     break;
 
                 case CANNON.Shape.types.PLANE:
-                    var geometry = new THREE.PlaneGeometry(100, 100);
+                    var geometry = new THREE.PlaneGeometry (100, 100);
                     mesh = new THREE.Object3D();
                     submesh = new THREE.Object3D();
-                    var ground = new THREE.Mesh(geometry, currentMaterial);
-                    ground.scale = new THREE.Vector3(1000, 1000, 1000);
-                    submesh.add(ground);
+                    var ground = new THREE.Mesh (geometry, currentMaterial);
+                    ground.scale = new THREE.Vector3 (1000, 1000, 1000);
+                    submesh.add (ground);
 
                     ground.castShadow = true;
                     ground.receiveShadow = true;
 
-                    mesh.add(submesh);
+                    mesh.add (submesh);
                     break;
 
                 case CANNON.Shape.types.BOX:
-                    var box_geometry = new THREE.CubeGeometry(shape.halfExtents.x * 2,
+                    var box_geometry = new THREE.CubeGeometry (
+						shape.halfExtents.x * 2,
                         shape.halfExtents.y * 2,
-                        shape.halfExtents.z * 2);
-                    mesh = new THREE.Mesh(box_geometry, currentMaterial);
+                        shape.halfExtents.z * 2
+					);
+                    mesh = new THREE.Mesh (box_geometry, currentMaterial);
                     mesh.castShadow = true;
                     mesh.receiveShadow = true;
                     break;
@@ -249,12 +250,12 @@ window.game.cannon = function() {
                         var o = shape.childOffsets[i];
                         var q = shape.childOrientations[i];
 
-                        submesh = _cannon.shape2mesh(subshape);
+                        submesh = _cannon.shape2mesh (subshape);
                         submesh.position.set(o.x, o.y, o.z);
                         submesh.quaternion.set(q.x, q.y, q.z, q.w);
 
                         submesh.useQuaternion = true;
-                        o3d.add(submesh);
+                        o3d.add (submesh);
                         mesh = o3d;
                     }
                     break;
@@ -266,19 +267,17 @@ window.game.cannon = function() {
             mesh.receiveShadow = true;
             mesh.castShadow = true;
 
-            if (mesh.children) {
+            if (mesh.children)
                 for (var i = 0; i < mesh.children.length; i++) {
                     mesh.children[i].castShadow = true;
                     mesh.children[i].receiveShadow = true;
 
-                    if (mesh.children[i]) {
+                    if (mesh.children[i])
                         for (var j = 0; j < mesh.children[i].length; j++) {
                             mesh.children[i].children[j].castShadow = true;
                             mesh.children[i].children[j].receiveShadow = true;
                         }
-                    }
                 }
-            }
 
             return mesh;
         },
@@ -286,7 +285,7 @@ window.game.cannon = function() {
             // Show axis-aligned bounding boxes for debugging purposes - Cannon.js uses bounding spheres by default for its collision detection
             var that = this;
 
-            var GeometryCache = function(createFunc) {
+            var GeometryCache = function (createFunc) {
                 var that = this,
                     geo = null,
                     geometries = [],
@@ -299,34 +298,33 @@ window.game.cannon = function() {
                         geo = createFunc();
                     }
 
-                    _three.scene.add(geo);
-                    gone.push(geo);
+                    _three.scene.add (geo);
+                    gone.push (geo);
 
                     return geo;
                 };
 
                 that.restart = function() {
                     while (gone.length) {
-                        geometries.push(gone.pop());
+                        geometries.push (gone.pop());
                     }
                 };
 
                 that.hideCached = function() {
-                    for (var i = 0; i < geometries.length; i++) {
-                        _three.scene.remove(geometries[i]);
-                    }
+                    for (var i = 0; i < geometries.length; i++)
+                        _three.scene.remove (geometries[i]);
                 }
             };
 
-            var bboxGeometry = new THREE.CubeGeometry(1, 1, 1);
+            var bboxGeometry = new THREE.CubeGeometry (1, 1, 1);
 
-            var bboxMaterial = new THREE.MeshBasicMaterial({
+            var bboxMaterial = new THREE.MeshBasicMaterial ({
                 color: 0xffffff,
                 wireframe: true
             });
 
-            var bboxMeshCache = new GeometryCache(function() {
-                return new THREE.Mesh(bboxGeometry, bboxMaterial);
+            var bboxMeshCache = new GeometryCache (function() {
+                return new THREE.Mesh (bboxGeometry, bboxMaterial);
             });
 
             that.update = function() {
@@ -336,9 +334,8 @@ window.game.cannon = function() {
                     var b = _cannon.bodies[i];
 
                     if (b.computeAABB) {
-                        if (b.aabbNeedsUpdate) {
+                        if (b.aabbNeedsUpdate)
                             b.computeAABB();
-                        }
 
                         if (isFinite(b.aabbmax.x) &&
                             isFinite(b.aabbmax.y) &&
@@ -351,13 +348,17 @@ window.game.cannon = function() {
                             b.aabbmax.z - b.aabbmin.z != 0) {
                             var mesh = bboxMeshCache.request();
 
-                            mesh.scale.set(b.aabbmax.x - b.aabbmin.x,
+                            mesh.scale.set (
+								b.aabbmax.x - b.aabbmin.x,
                                 b.aabbmax.y - b.aabbmin.y,
-                                b.aabbmax.z - b.aabbmin.z);
+                                b.aabbmax.z - b.aabbmin.z
+							);
 
-                            mesh.position.set((b.aabbmax.x + b.aabbmin.x) * 0.5,
+                            mesh.position.set (
+								(b.aabbmax.x + b.aabbmin.x) * 0.5,
                                 (b.aabbmax.y + b.aabbmin.y) * 0.5,
-                                (b.aabbmax.z + b.aabbmin.z) * 0.5);
+                                (b.aabbmax.z + b.aabbmin.z) * 0.5
+							);
                         }
                     }
                 }

@@ -26,13 +26,13 @@ window.game.events = function() {
 			},
 
 			// Methods
-			onKeyDown: function(event) {
+			onKeyDown: function (event) {
 				// Set the pressed state for a key
 				_events.keyboard.pressed[_events.keyboard.keyCodes[event.keyCode]] = true;
 				// Fire common onKeyDown event which can be set from outside
 				_events.onKeyDown();
 			},
-			onKeyUp: function(event) {
+			onKeyUp: function (event) {
 				// Unset the pressed state for a key
 				_events.keyboard.pressed[_events.keyboard.keyCodes[event.keyCode]] = false;
 			}
@@ -41,8 +41,8 @@ window.game.events = function() {
 		// Methods
 		init: function() {
 			// Add the listeners
-			document.addEventListener("keydown", _events.keyboard.onKeyDown, false);
-			document.addEventListener("keyup", _events.keyboard.onKeyUp, false);
+			document.addEventListener ("keydown", _events.keyboard.onKeyDown, false);
+			document.addEventListener ("keyup", _events.keyboard.onKeyUp, false);
 		},
 		onKeyDown: function() {
 			// No specific actions by default

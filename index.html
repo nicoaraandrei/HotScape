@@ -12,7 +12,13 @@
 		<div id="infobox-intro" class="infobox">
 			<h2>Hotscape instructions:</h2>
 			<p>You can control the player by using the following keys:</p>
-			<p>W &rarr; Forward<br />S &rarr; Backward<br />A &rarr; Left<br />D &rarr; Right<br />SPACE &rarr; Jump</p>
+			<p>
+				W &rarr; Forward<br>
+				S &rarr; Backward<br>
+				A &rarr; Left<br>
+				D &rarr; Right<br>
+				SPACE &rarr; Jump
+			</p>
 		</div>
 
 		<div id="infobox-bamboozled" class="infobox">
@@ -35,15 +41,14 @@
 		<script src="js/game.models.js"></script> 
 
 		<script>
-			if (!Detector.webgl) {
-				Detector.addGetWebGLMessage();
-			} else {
+			if (Detector.webgl) {
 				window.gameInstance = window.game.core();
-				window.gameInstance.init({
-					domContainer: document.querySelector("#game"),
+				window.gameInstance.init ({
+					domContainer: document.querySelector ("#game"),
 					rendererClearColor: window.game.static.white
 				});
-			}
+			} else
+				Detector.addGetWebGLMessage();
 
 			// STATS VIA MONKEY PATCH
 			(function() {
@@ -54,7 +59,7 @@
 				stats.domElement.style.left = "0px";
 				stats.domElement.style.top = "0px";
 
-				document.body.appendChild( stats.domElement );
+				document.body.appendChild (stats.domElement);
 
 				window.gameInstance.loop = function() {
 					stats.begin();

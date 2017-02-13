@@ -1,6 +1,5 @@
 {
-	"metadata" :
-	{
+	"metadata" : {
 		"formatVersion" : 3.1,
 		"generatedBy"   : "Blender 2.65 Exporter",
 		"vertices"      : 56,
@@ -13,7 +12,7 @@
 		"bones"         : 0
 	},
 	"scale" : 1.000000,
-	"materials" : [	{
+	"materials" : [{
 		"DbgColor" : 15658734,
 		"DbgIndex" : 0,
 		"DbgName" : "cyan",
@@ -28,8 +27,7 @@
 		"transparency" : 1.0,
 		"transparent" : false,
 		"vertexColors" : false
-	},
-	{
+	}, {
 		"DbgColor" : 15597568,
 		"DbgIndex" : 1,
 		"DbgName" : "green",

@@ -8,8 +8,7 @@ window.game = window.game || {};
 
 window.game.models = {
 	player: {
-		"metadata" :
-		{
+		"metadata" : {
 			"formatVersion" : 3.1,
 			"generatedBy"   : "Blender 2.65 Exporter",
 			"vertices"      : 56,
@@ -22,7 +21,7 @@ window.game.models = {
 			"bones"         : 0
 		},
 		"scale" : 1.000000,
-		"materials" : [	{
+		"materials" : [{
 			"DbgColor" : 15658734,
 			"DbgIndex" : 0,
 			"DbgName" : "cyan",
@@ -37,8 +36,7 @@ window.game.models = {
 			"transparency" : 1.0,
 			"transparent" : false,
 			"vertexColors" : false
-		},
-		{
+		}, {
 			"DbgColor" : 15597568,
 			"DbgIndex" : 1,
 			"DbgName" : "green",
