@@ -306,7 +306,7 @@ window.game.core = function () {
 				});
 				_game.level.platform.collisionFilterGroup = _game.GROUP1;
 				_game.level.platform.collisionFilterMask =  _game.GROUP1 | _game.GROUP2 | _game.GROUP3 | _game.GROUP4;
-				//Add some boxes
+				// Add some boxes
 				_game.level.traps.push (_cannon.createRigidBody ({
 					shape: new CANNON.Box (new CANNON.Vec3 (30, 30, 30)),
 					mass: 5,
@@ -408,38 +408,27 @@ window.game.core = function () {
 			_three.setupLights = function () {
 				var hemiLight = new THREE.HemisphereLight (
 					window.game.static.colors.white,
-					window.game.static.colors.white,
-					0.6
+					window.game.static.colors.sunny,
+					0.5
 				);
 				hemiLight.position.set (0, 0, -1);
-				_three.scene.add(hemiLight);
-
-				var pointLight = new THREE.PointLight (window.game.static.colors.white, 0.5);
-				pointLight.position.set (0, 0, 500);
-				_three.scene.add(pointLight);
+				_three.scene.add (hemiLight);
 
 				// Shadow casting light
-				var pSun = new THREE.DirectionalLight (window.game.static.colors.white, 1);
-				pSun.position.set (400, 400, 400);
-
+				var pSun = new THREE.DirectionalLight (window.game.static.colors.sunny, 1);
 				pSun.castShadow = true;
 				pSun.shadowDarkness = 0.5;
-
 				pSun.shadowMapWidth = 1024;
 				pSun.shadowMapHeight = 1024;
-
 				pSun.shadow.camera.top = 300;
 				pSun.shadow.camera.right = 300;
 				pSun.shadow.camera.left = -300;
 				pSun.shadow.camera.bottom = -300;
-
 				pSun.shadowCameraNear = 250;
 				pSun.shadowCameraFar = 2000;
 				pSun.shadowCameraFov = 200;
-
-				pSun.shadowCameraVisible = true;
-
-				_three.scene.add(pSun);
+				pSun.position.set (400, 400, 400);
+				_three.scene.add (pSun);
 			};
 
 			// Initialize components with options
