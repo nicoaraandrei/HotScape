@@ -138,20 +138,18 @@ window.game.three = function() {
 			return model;
 		},
 		createCannonGeometry: function (geometry, scale) {
-			var translateX;
-			var translateY;
-			var translateZ;
-
-			// Get the bounding box for the provided geometry
-			geometry.computeBoundingBox();
+			var translate = new THREE.Vector3();
+			geometry.computeBoundingBox(); // Get the bounding box for the provided geometry
 
 			// Center the imported model so the axis-aligned bounding boxes (AABB) and bounding spheres are generated correctly by Cannon.js
-			translateX = -((geometry.boundingBox.size().x / 2) + geometry.boundingBox.min.x);
-			translateY = -((geometry.boundingBox.size().y / 2) + geometry.boundingBox.min.y);
-			translateZ = -((geometry.boundingBox.size().z / 2) + geometry.boundingBox.min.z);
+			// translate = -((geometry.boundingBox.getSize() / 2) + geometry.boundingBox.min);
+			translate.copy (geometry.boundingBox.getSize());
+			translate.multiplyScalar (.5);
+			translate.add (geometry.boundingBox.min);
+			translate.multiplyScalar (-1);
 
 			// Apply various matrix transformations to translate, rotate and scale the imported model for the Cannon.js coordinate system
-			geometry.applyMatrix (new THREE.Matrix4().makeTranslation (translateX, translateY, translateZ));
+			geometry.applyMatrix (new THREE.Matrix4().makeTranslation (translate.x, translate.y, translate.z));
 			geometry.applyMatrix (new THREE.Matrix4().makeRotationAxis (new THREE.Vector3 (1, 0, 0), Math.PI / 2));
 			geometry.applyMatrix (new THREE.Matrix4().makeScale (scale, scale, scale));
 		},
