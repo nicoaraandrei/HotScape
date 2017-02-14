@@ -294,13 +294,13 @@ window.game.core = function () {
 				_cannon.solidMaterial = _cannon.createPhysicsMaterial (new CANNON.Material ("solidMaterial"), 0, 0.1);
 
 				var floorSize = 400;
-				var floorHeight = 20;
+				var floorHeight = 10;
 
 				// Add a floor
 				_game.level.platform = _cannon.createRigidBody ({
 					shape: new CANNON.Box (new CANNON.Vec3 (floorSize, floorSize, floorHeight)),
 					mass: 0,
-					position: new CANNON.Vec3 (0, 0, -floorHeight),
+					position: new CANNON.Vec3 (0, 0, -floorHeight/2),
 					meshMaterial: new THREE.MeshLambertMaterial ({color: window.game.static.colors.white}),
 					physicsMaterial: _cannon.solidMaterial
 				});
@@ -359,11 +359,9 @@ window.game.core = function () {
 			// Setup necessary game components (_events, _three, _cannon, _ui)
 			_game.initComponents (options);
 
-			// Create player and level
 			_game.player.create();
 			_game.level.create();
 
-			// Initiate the game loop
 			_game.loop();
 		},
 		destroy: function() {
@@ -414,19 +412,19 @@ window.game.core = function () {
 				hemiLight.position.set (0, 0, -1);
 				_three.scene.add (hemiLight);
 
-				// Shadow casting light
 				var pSun = new THREE.DirectionalLight (window.game.static.colors.sunny, 1);
 				pSun.castShadow = true;
-				pSun.shadow.mapSize.width = 1024;
-				pSun.shadow.mapSize.height = 1024;
-				pSun.shadow.camera.top = 300;
-				pSun.shadow.camera.right = 300;
-				pSun.shadow.camera.left = -300;
-				pSun.shadow.camera.bottom = -300;
-				pSun.shadow.camera.near = 250;
-				pSun.shadow.camera.far = 2000;
-				pSun.shadow.camera.fov = 200;
-				pSun.position.set (400, 400, 400);
+				// floorSize: 400
+				pSun.shadow.mapSize.width =  2000; // *5
+				pSun.shadow.mapSize.height =  2000; // *5
+				pSun.shadow.camera.top  =  800; // *2
+				pSun.shadow.camera.right =  800; // *2
+				pSun.shadow.camera.left  = -800; // *-2
+				pSun.shadow.camera.bottom = -800; // *-2
+				pSun.shadow.camera.near  =  1;
+				pSun.shadow.camera.fov  =  200; // *.5
+				pSun.shadow.camera.far  =  2000; // *5
+				pSun.position.set (400, 400, 800); // *(1, 1, 2)
 				_three.scene.add (pSun);
 			};
 
