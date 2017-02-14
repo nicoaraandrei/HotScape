@@ -293,12 +293,15 @@ window.game.core = function () {
 				// Create a solid material for all objects in the world
 				_cannon.solidMaterial = _cannon.createPhysicsMaterial (new CANNON.Material ("solidMaterial"), 0, 0.1);
 
-				var floorSize = 400;
 				var floorHeight = 10;
 
 				// Add a floor
 				_game.level.platform = _cannon.createRigidBody ({
-					shape: new CANNON.Box (new CANNON.Vec3 (floorSize, floorSize, floorHeight)),
+					shape: new CANNON.Box (new CANNON.Vec3 (
+						window.game.static.floorSize,
+						window.game.static.floorSize,
+						floorHeight
+					)),
 					mass: 0,
 					position: new CANNON.Vec3 (0, 0, -floorHeight/2),
 					meshMaterial: new THREE.MeshLambertMaterial ({color: window.game.static.colors.white}),
@@ -414,17 +417,16 @@ window.game.core = function () {
 
 				var pSun = new THREE.DirectionalLight (window.game.static.colors.sunny, 1);
 				pSun.castShadow = true;
-				// floorSize: 400
-				pSun.shadow.mapSize.width =  2000; // *5
-				pSun.shadow.mapSize.height =  2000; // *5
-				pSun.shadow.camera.top  =  800; // *2
-				pSun.shadow.camera.right =  800; // *2
-				pSun.shadow.camera.left  = -800; // *-2
-				pSun.shadow.camera.bottom = -800; // *-2
+				pSun.shadow.mapSize.width =  window.game.static.floorSize * 5;
+				pSun.shadow.mapSize.height =  window.game.static.floorSize * 5;
+				pSun.shadow.camera.top  =  window.game.static.floorSize * 2;
+				pSun.shadow.camera.right =  window.game.static.floorSize * 2;
+				pSun.shadow.camera.left  = window.game.static.floorSize * -2;
+				pSun.shadow.camera.bottom = window.game.static.floorSize * -2;
 				pSun.shadow.camera.near  =  1;
-				pSun.shadow.camera.fov  =  200; // *.5
-				pSun.shadow.camera.far  =  2000; // *5
-				pSun.position.set (400, 400, 800); // *(1, 1, 2)
+				pSun.shadow.camera.fov  =  window.game.static.floorSize / 2;
+				pSun.shadow.camera.far  =  window.game.static.floorSize * 5;
+				pSun.position.set (window.game.static.floorSize, window.game.static.floorSize, window.game.static.floorSize * 2);
 				_three.scene.add (pSun);
 			};
 

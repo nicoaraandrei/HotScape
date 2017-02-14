@@ -14,5 +14,6 @@ window.game.static = {
 		green: 0x0fdb8c,
 		cyan: 0x38FDD9,
 		sunny: 0xffffbb
-	}
+	},
+	floorSize: 400
 };
