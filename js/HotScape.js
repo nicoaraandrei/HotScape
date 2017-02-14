@@ -207,13 +207,13 @@ window.game.core = function () {
 							_game.player.rotationRadians.z
 						);
 					if(_game.timeSpeed < _game.timeSpeedMax) {
-						_game.timeSpeed += 0.04;	
+						_game.timeSpeed += 0.1;	
 					}
 					
 				}
 				else {
-					if(_game.timeSpeed > _game.timeSpeedMin) {
-						_game.timeSpeed -= 0.04;	
+					if(_game.timeSpeed > _game.timeSpeedMin+0.1) {
+						_game.timeSpeed -= 0.1;	
 					}
 				}
 				if(_events.keyboard.pressed[_game.player.controlKeys.run]) {
