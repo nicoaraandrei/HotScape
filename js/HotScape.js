@@ -1,14 +1,17 @@
 window.game = window.game || {};
-
 window.game.core = function () {
 	_game = {
 		// Attributes
+		//time speed
+		timeSpeed: 1.0,
+		timeSpeedMax: 1.0,
+		timeSpeedMin: 0.1,
 		//collision filter group - must be power of 2
 		GROUP1 : 1, // platform
 		GROUP2 : 2, // player
 		GROUP3 : 4, // obstacle
 		GROUP4 : 8, // trap
-		player: {
+		player: { // Attributes
 			model: null,
 			mesh: null,
 			shape: null,
@@ -17,6 +20,8 @@ window.game.core = function () {
 			orientationConstraint: null, // HingeConstraint - limit player's air-twisting
 			isGrounded: false,
 			jumpHeight: 38,
+			defaultSpeed: 1.5,
+			defaultSpeedMax: 45,
 			speed: 1.5,
 			speedMax: 45,
 			rotationSpeed: 0.007,
@@ -53,7 +58,7 @@ window.game.core = function () {
 				left: "a",
 				right: "d",
 				jump: "space",
-				shift: "shift"
+				run: "shift"
 			},
 
 			create: function() {
@@ -125,8 +130,6 @@ window.game.core = function () {
 
 				// Collision event listener for the jump mechanism
 				_game.player.rigidBody.addEventListener ("collide", function (event) {
-					if (event.with.tag == "trap")
-						_game.player.checkGameOver (true);
 					// Checks if player's is on ground
 					if (!_game.player.isGrounded)
 						// Ray intersection test to check if player is colliding with an object beneath him
@@ -136,6 +139,8 @@ window.game.core = function () {
 								new CANNON.Vec3 (0, 0, -1)
 							).intersectBody (event.contact.bi).length > 0
 						);
+					if (event.with.tag == "trap")
+						_game.player.checkGameOver (true);
 				});
 
 				//	if (event.with.collisionFilterGroup == _game.GROUP4)
@@ -189,10 +194,6 @@ window.game.core = function () {
 				}
 			},
 			processUserInput: function() {
-				if (_events.keyboard.pressed[_game.player.controlKeys.shift]) {
-					// nothing for now
-				}
-
 				if (_events.keyboard.pressed[_game.player.controlKeys.jump])
 					_game.player.jump();
 
@@ -205,6 +206,23 @@ window.game.core = function () {
 							new CANNON.Vec3 (0, 0, 1),
 							_game.player.rotationRadians.z
 						);
+					if(_game.timeSpeed < _game.timeSpeedMax) {
+						_game.timeSpeed += 0.04;	
+					}
+					
+				}
+				else {
+					if(_game.timeSpeed > _game.timeSpeedMin) {
+						_game.timeSpeed -= 0.04;	
+					}
+				}
+				if(_events.keyboard.pressed[_game.player.controlKeys.run]) {
+					_game.player.speed = _game.player.defaultSpeed*3;
+					_game.player.speedMax = _game.player.defaultSpeedMax*3;
+				}
+				else {
+					_game.player.speed = _game.player.defaultSpeed;
+					_game.player.speedMax = _game.player.defaultSpeedMax;
 				}
 
 				if (_events.keyboard.pressed[_game.player.controlKeys.backward])
@@ -287,6 +305,7 @@ window.game.core = function () {
 
 		level: {
 			platform: {},
+			walls: [],
 			objects: [],
 			traps: [],
 			create: function() {
@@ -307,9 +326,19 @@ window.game.core = function () {
 					meshMaterial: new THREE.MeshLambertMaterial ({color: window.game.static.colors.white}),
 					physicsMaterial: _cannon.solidMaterial
 				});
-				_game.level.platform.collisionFilterGroup = _game.GROUP1;
-				_game.level.platform.collisionFilterMask =  _game.GROUP1 | _game.GROUP2 | _game.GROUP3 | _game.GROUP4;
-				// Add some boxes
+				//_game.level.platform.collisionFilterGroup = _game.GROUP1;
+				//_game.level.platform.collisionFilterMask =  _game.GROUP1 | _game.GROUP2 | _game.GROUP3 | _game.GROUP4;
+
+
+				//Add a wall
+				_game.level.walls.push ( _cannon.createRigidBody({
+					shape: new CANNON.Box (new CANNON.Vec3 (window.game.static.floorSize, floorHeight, window.game.static.floorSize/2)),
+					mass: 0,
+					position: new CANNON.Vec3 (0, window.game.static.floorSize+floorHeight, 0),
+					meshMaterial: new THREE.MeshLambertMaterial ({color: window.game.static.colors.green}),
+					physicsMaterial: _cannon.solidMaterial
+				}));
+				//Add some boxes
 				_game.level.traps.push (_cannon.createRigidBody ({
 					shape: new CANNON.Box (new CANNON.Vec3 (30, 30, 30)),
 					mass: 5,
@@ -409,11 +438,15 @@ window.game.core = function () {
 			_three.setupLights = function () {
 				var hemiLight = new THREE.HemisphereLight (
 					window.game.static.colors.white,
-					window.game.static.colors.sunny,
-					0.5
+					window.game.static.colors.white,
+					0.6
 				);
 				hemiLight.position.set (0, 0, -1);
-				_three.scene.add (hemiLight);
+				_three.scene.add(hemiLight);
+
+				var pointLight = new THREE.PointLight (window.game.static.colors.white, 0.2);
+				pointLight.position.set (0, 0, 500);
+				_three.scene.add(pointLight);
 
 				var pSun = new THREE.DirectionalLight (window.game.static.colors.sunny, 1);
 				pSun.castShadow = true;
@@ -428,6 +461,7 @@ window.game.core = function () {
 				pSun.shadow.camera.far  =  window.game.static.floorSize * 5;
 				pSun.position.set (window.game.static.floorSize, window.game.static.floorSize, window.game.static.floorSize * 2);
 				_three.scene.add (pSun);
+				_three.scene.add (new THREE.CameraHelper (pSun.shadow.camera));
 			};
 
 			// Initialize components with options
@@ -437,8 +471,8 @@ window.game.core = function () {
 			_events.init();
 
 			// Enable shadows for THREE.js
-			_three.renderer.shadowMap.enabled = true;
-			_three.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+			_three.renderer.shadowMapEnabled = true;
+			_three.renderer.shadowMapType = THREE.PCFSoftShadowMap;
 
 			_events.onKeyDown = function () {
 				if (!_ui.hasClass ("infoboxIntro", "fade-out"))

@@ -201,7 +201,8 @@ window.game.cannon = function() {
 
 			// Perform a simulation step
 			//change the timestep for slowmo
-			_cannon.world.step (_cannon.timestep);
+			//console.log(_game.timeSpeed);
+			_cannon.world.step (_cannon.timestep*_game.timeSpeed);
 		},
 		shape2mesh: function (shape, currentMaterial) {
 			// Convert a given shape to a THREE.js mesh
