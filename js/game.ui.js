@@ -8,22 +8,17 @@ window.game = window.game || {};
 
 window.game.ui = function() {
 	var _ui = {
-		// Attributes
 		elements: {
 			// Properties for DOM elements are stored here
 			infoboxIntro: null,
 			infoboxLost: null
 		},
-
-		// Methods
 		init: function () {
 			// Get DOM elements and bind events to them
 			_ui.getElements();
 			_ui.bindEvents();
 		},
-		destroy: function () {
-
-		},
+		destroy: function () {},
 		getElements: function () {
 			// Store the DOM elements in the elements object to make them accessible in addClass, removeClass and hasClass
 			_ui.elements.infoboxIntro = document.querySelector ("#infoboxIntro");
@@ -38,14 +33,13 @@ window.game.ui = function() {
 				_ui.addClass (element, "fade-out");
 		},
 		fadeIn: function (element) {
-			if(!_ui.hasClass(element, "fade-in"))
+			if (!_ui.hasClass(element, "fade-in"))
 				_ui.addClass(element, "fade-in");
 		},
 		addClass: function (element, className, resetClassName) {
 			// Adds a class to a specified element
-			if (resetClassName && _ui.elements[element].getAttribute ("data-classname")) {
+			if (resetClassName && _ui.elements[element].getAttribute ("data-classname"))
 				_ui.elements[element].className = resetClassName && _ui.elements[element].getAttribute ("data-classname");
-			}
 			_ui.elements[element].className = _ui.elements[element].className + " " + className;
 		},
 		removeClass: function (element, className) {

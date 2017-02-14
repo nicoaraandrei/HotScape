@@ -1,15 +1,15 @@
 {
 	"metadata" : {
-		"formatVersion" : 3.1,
-		"generatedBy"   : "Blender 2.65 Exporter",
-		"vertices"      : 56,
-		"faces"         : 52,
-		"normals"       : 56,
-		"colors"        : 0,
-		"uvs"           : [],
-		"materials"     : 1,
-		"morphTargets"  : 0,
-		"bones"         : 0
+		"formatVersion"	: 3.1,
+		"generatedBy"	: "Blender 2.65 Exporter",
+		"vertices"		: 56,
+		"faces"			: 52,
+		"normals"		: 56,
+		"colors"		: 0,
+		"uvs"			: [],
+		"materials"		: 1,
+		"morphTargets"	: 0,
+		"bones"			: 0
 	},
 	"scale" : 1.000000,
 	"materials" : [{
