@@ -8,7 +8,7 @@ window.game.core = function () {
 		GROUP2 : 2, // player
 		GROUP3 : 4, // obstacle
 		GROUP4 : 8, // trap
-		player: { // Attributes
+		player: {
 			model: null,
 			mesh: null,
 			shape: null,
@@ -417,16 +417,15 @@ window.game.core = function () {
 				// Shadow casting light
 				var pSun = new THREE.DirectionalLight (window.game.static.colors.sunny, 1);
 				pSun.castShadow = true;
-				pSun.shadowDarkness = 0.5;
-				pSun.shadowMapWidth = 1024;
-				pSun.shadowMapHeight = 1024;
+				pSun.shadow.mapSize.width = 1024;
+				pSun.shadow.mapSize.height = 1024;
 				pSun.shadow.camera.top = 300;
 				pSun.shadow.camera.right = 300;
 				pSun.shadow.camera.left = -300;
 				pSun.shadow.camera.bottom = -300;
-				pSun.shadowCameraNear = 250;
-				pSun.shadowCameraFar = 2000;
-				pSun.shadowCameraFov = 200;
+				pSun.shadow.camera.near = 250;
+				pSun.shadow.camera.far = 2000;
+				pSun.shadow.camera.fov = 200;
 				pSun.position.set (400, 400, 400);
 				_three.scene.add (pSun);
 			};
@@ -438,8 +437,8 @@ window.game.core = function () {
 			_events.init();
 
 			// Enable shadows for THREE.js
-			_three.renderer.shadowMapEnabled = true;
-			_three.renderer.shadowMapType = THREE.PCFSoftShadowMap;
+			_three.renderer.shadowMap.enabled = true;
+			_three.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 			_events.onKeyDown = function () {
 				if (!_ui.hasClass ("infoboxIntro", "fade-out"))
