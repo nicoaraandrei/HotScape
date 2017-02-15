@@ -31,21 +31,15 @@ window.game.events = function() {
 		mouse: {
 			keyCodes: {
 				1: "leftC",
-			//	3: "rightC", // the only one not in js/HotScape.js for increased performance
-				2: "middleC"
+				2: "middleC",
+				3: "rightC"
 			},
 			pressed: {},
 			onMouseDown: function (event) {
-				if (event.which == 3) {
-					console.log ("1st person");
-				} else
-					_events.mouse.pressed[_events.mouse.keyCodes[event.which]] = true;
+				_events.mouse.pressed[_events.mouse.keyCodes[event.which]] = true;
 			},
 			onMouseUp: function (event) {
-				if (event.which == 3) {
-					console.log ("3rd person");
-				} else
-					_events.mouse.pressed[_events.mouse.keyCodes[event.which]] = false;
+				_events.mouse.pressed[_events.mouse.keyCodes[event.which]] = false;
 			}
 		},
 		init: function() {
