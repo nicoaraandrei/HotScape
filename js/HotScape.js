@@ -1,8 +1,6 @@
 window.game = window.game || {};
 window.game.core = function () {
 	_game = {
-		// Attributes
-		//time speed
 		timeSpeed: 1.0,
 		timeSpeedMax: 1.0,
 		timeSpeedMin: 0.1,
@@ -11,7 +9,7 @@ window.game.core = function () {
 		GROUP2 : 2, // player
 		GROUP3 : 4, // obstacle
 		GROUP4 : 8, // trap
-		player: { // Attributes
+		player: {
 			model: null,
 			mesh: null,
 			shape: null,
@@ -99,7 +97,7 @@ window.game.core = function () {
 
 				// Enable shadows
 				_game.player.mesh.castShadow = true;
-				_game.player.mesh.receiveShadow = true;
+				_game.player.mesh.receiveShadow = false;
 
 				//freeze exceeding rotation
 				_game.player.rigidBody.inertia.set (0, 0, 0);
@@ -194,36 +192,34 @@ window.game.core = function () {
 				}
 			},
 			processUserInput: function() {
-				if (_events.keyboard.pressed[_game.player.controlKeys.jump])
-					_game.player.jump();
-
 				if (_events.keyboard.pressed[_game.player.controlKeys.forward]) {
 					_game.player.updateAcceleration (_game.player.playerAccelerationValues.position,  1);
 
 					// Reset orientation in air
-					if (!_cannon.getCollisions(_game.player.rigidBody.index))
+					if (!_cannon.getCollisions (_game.player.rigidBody.index))
 						_game.player.rigidBody.quaternion.setFromAxisAngle (
 							new CANNON.Vec3 (0, 0, 1),
 							_game.player.rotationRadians.z
 						);
-					if(_game.timeSpeed < _game.timeSpeedMax) {
-						_game.timeSpeed += 0.1;	
+					if (_game.timeSpeed < _game.timeSpeedMax) {
+						_game.timeSpeed += 0.1;
 					}
-					
-				}
-				else {
-					if(_game.timeSpeed > _game.timeSpeedMin+0.1) {
-						_game.timeSpeed -= 0.1;	
+				} else {
+					if (_game.timeSpeed > _game.timeSpeedMin + 0.1) {
+						_game.timeSpeed -= 0.1;
 					}
 				}
-				if(_events.keyboard.pressed[_game.player.controlKeys.run]) {
-					_game.player.speed = _game.player.defaultSpeed*3;
-					_game.player.speedMax = _game.player.defaultSpeedMax*3;
-				}
-				else {
+
+				if (_events.keyboard.pressed[_game.player.controlKeys.run]) {
+					_game.player.speedMax = _game.player.defaultSpeedMax * 3;
+					_game.player.speed = _game.player.defaultSpeed * 3;
+				} else {
 					_game.player.speed = _game.player.defaultSpeed;
 					_game.player.speedMax = _game.player.defaultSpeedMax;
 				}
+
+				if (_events.keyboard.pressed[_game.player.controlKeys.jump])
+					_game.player.jump();
 
 				if (_events.keyboard.pressed[_game.player.controlKeys.backward])
 					_game.player.updateAcceleration (_game.player.playerAccelerationValues.position, -1);
@@ -323,7 +319,7 @@ window.game.core = function () {
 					)),
 					mass: 0,
 					position: new CANNON.Vec3 (0, 0, -floorHeight/2),
-					meshMaterial: new THREE.MeshLambertMaterial ({color: window.game.static.colors.white}),
+					meshMaterial: new THREE.MeshLambertMaterial ({color: window.game.static.colors.dirt}),
 					physicsMaterial: _cannon.solidMaterial
 				});
 				//_game.level.platform.collisionFilterGroup = _game.GROUP1;
@@ -331,10 +327,10 @@ window.game.core = function () {
 
 
 				//Add a wall
-				_game.level.walls.push ( _cannon.createRigidBody({
-					shape: new CANNON.Box (new CANNON.Vec3 (window.game.static.floorSize, floorHeight, window.game.static.floorSize/2)),
+				_game.level.walls.push (_cannon.createRigidBody ({
+					shape: new CANNON.Box (new CANNON.Vec3 (window.game.static.floorSize, floorHeight, window.game.static.floorSize / 2)),
 					mass: 0,
-					position: new CANNON.Vec3 (0, window.game.static.floorSize+floorHeight, 0),
+					position: new CANNON.Vec3 (0, window.game.static.floorSize + floorHeight, 0),
 					meshMaterial: new THREE.MeshLambertMaterial ({color: window.game.static.colors.green}),
 					physicsMaterial: _cannon.solidMaterial
 				}));
@@ -436,32 +432,39 @@ window.game.core = function () {
 			_ui = window.game.ui();
 
 			_three.setupLights = function () {
-				var hemiLight = new THREE.HemisphereLight (
-					window.game.static.colors.white,
-					window.game.static.colors.white,
-					0.6
+				var pSun = new THREE.DirectionalLight (
+					window.game.static.colors.sunny, // color
+					1 // intensity
 				);
-				hemiLight.position.set (0, 0, -1);
-				_three.scene.add(hemiLight);
-
-				var pointLight = new THREE.PointLight (window.game.static.colors.white, 0.2);
-				pointLight.position.set (0, 0, 500);
-				_three.scene.add(pointLight);
-
-				var pSun = new THREE.DirectionalLight (window.game.static.colors.sunny, 1);
 				pSun.castShadow = true;
-				pSun.shadow.mapSize.width =  window.game.static.floorSize * 5;
-				pSun.shadow.mapSize.height =  window.game.static.floorSize * 5;
-				pSun.shadow.camera.top  =  window.game.static.floorSize * 2;
-				pSun.shadow.camera.right =  window.game.static.floorSize * 2;
-				pSun.shadow.camera.left  = window.game.static.floorSize * -2;
+				pSun.shadow.mapSize.width = window.game.static.floorSize * 5;
+				pSun.shadow.mapSize.height = window.game.static.floorSize * 5;
+				pSun.shadow.camera.top = window.game.static.floorSize * 2;
+				pSun.shadow.camera.right = window.game.static.floorSize * 2;
+				pSun.shadow.camera.left = window.game.static.floorSize * -2;
 				pSun.shadow.camera.bottom = window.game.static.floorSize * -2;
-				pSun.shadow.camera.near  =  1;
-				pSun.shadow.camera.fov  =  window.game.static.floorSize / 2;
-				pSun.shadow.camera.far  =  window.game.static.floorSize * 5;
-				pSun.position.set (window.game.static.floorSize, window.game.static.floorSize, window.game.static.floorSize * 2);
+				pSun.shadow.camera.near = 1;
+				pSun.shadow.camera.fov = window.game.static.floorSize / 3;
+				pSun.shadow.camera.far = window.game.static.floorSize * 2;
+				pSun.position.set (
+					window.game.static.floorSize * 2 / 5,	// X
+					window.game.static.floorSize * 2 / 5,	// Z
+					window.game.static.floorSize			// Y
+				);
 				_three.scene.add (pSun);
 				_three.scene.add (new THREE.CameraHelper (pSun.shadow.camera));
+
+				var cSun = new THREE.HemisphereLight (
+					window.game.static.colors.sky,	// sky color
+					window.game.static.colors.dirt,	// ground color
+					.6 // intensity
+				);
+				cSun.position.set (
+					-window.game.static.floorSize,
+					-window.game.static.floorSize,
+					0
+				);
+				_three.scene.add (cSun);
 			};
 
 			// Initialize components with options
@@ -471,8 +474,8 @@ window.game.core = function () {
 			_events.init();
 
 			// Enable shadows for THREE.js
-			_three.renderer.shadowMapEnabled = true;
-			_three.renderer.shadowMapType = THREE.PCFSoftShadowMap;
+			_three.renderer.shadowMap.enabled = true;
+			_three.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 			_events.onKeyDown = function () {
 				if (!_ui.hasClass ("infoboxIntro", "fade-out"))

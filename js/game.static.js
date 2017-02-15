@@ -13,6 +13,8 @@ window.game.static = {
 		white: 0xffffff,
 		green: 0x0fdb8c,
 		cyan: 0x38FDD9,
+		dirt: 0x74583e,
+		sky: 0x3e5a74,
 		sunny: 0xffffbb
 	},
 	floorSize: 400
