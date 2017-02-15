@@ -36,6 +36,7 @@ window.game.core = function () {
 			cameraCoords: null,
 			cameraOffsetH: 240,
 			cameraOffsetV: 140,
+			firstPerson: false,
 
 			// Enum for an easier method access to acceleration/rotation
 			playerAccelerationValues: {
@@ -61,9 +62,9 @@ window.game.core = function () {
 				run: "shift"
 			},
 			mouseButtons: {
-				fire: "leftC"/*,
-				nothingYet: "middleC"
-				*/
+				fire: "leftC",
+				//nothingYet: "middleC",
+				aim: "rightC"
 			},
 
 			create: function() {
@@ -163,13 +164,15 @@ window.game.core = function () {
 				_game.player.checkGameOver();
 			},
 			updateCamera: function() {
+				_game.player.mesh.visible = !_game.player.firstPerson;
 				// Calculate camera coordinates by using Euler radians from player's last rotation
-				_game.player.cameraCoords = window.game.helpers.polarToCartesian (_game.player.cameraOffsetH, _game.player.rotationRadians.z);
-
-				_three.camera.position.x = _game.player.mesh.position.x + _game.player.cameraCoords.x;
-				_three.camera.position.y = _game.player.mesh.position.y + _game.player.cameraCoords.y;
-				_three.camera.position.z = _game.player.mesh.position.z + _game.player.cameraOffsetV;
-
+				_game.player.cameraCoords = window.game.helpers.polarToCartesian (
+					_game.player.cameraOffsetH / (_game.player.firstPerson ? 10 : 1),
+					_game.player.rotationRadians.z
+				);
+				_three.camera.position.copy (_game.player.cameraCoords);
+				_three.camera.position.z = _game.player.cameraOffsetV / (_game.player.firstPerson ? 6 : 1);
+				_three.camera.position.add (_game.player.mesh.position);
 				_three.camera.lookAt (_game.player.mesh.position);
 			},
 			updateAcceleration: function (values, direction) {
@@ -199,6 +202,16 @@ window.game.core = function () {
 				}
 			},
 			processUserInput: function() {
+				_game.player.firstPerson = _events.mouse.pressed[_game.player.mouseButtons.aim];
+
+				if (_events.keyboard.pressed[_game.player.controlKeys.run]) {
+					_game.player.speedMax = _game.player.defaultSpeedMax * 3;
+					_game.player.speed = _game.player.defaultSpeed * 3;
+				} else {
+					_game.player.speed = _game.player.defaultSpeed;
+					_game.player.speedMax = _game.player.defaultSpeedMax;
+				}
+
 				if (_events.keyboard.pressed[_game.player.controlKeys.forward]) {
 					_game.player.updateAcceleration (_game.player.playerAccelerationValues.position,  1);
 
@@ -217,14 +230,6 @@ window.game.core = function () {
 					}
 				}
 
-				if (_events.keyboard.pressed[_game.player.controlKeys.run]) {
-					_game.player.speedMax = _game.player.defaultSpeedMax * 3;
-					_game.player.speed = _game.player.defaultSpeed * 3;
-				} else {
-					_game.player.speed = _game.player.defaultSpeed;
-					_game.player.speedMax = _game.player.defaultSpeedMax;
-				}
-
 				if (_events.keyboard.pressed[_game.player.controlKeys.jump])
 					_game.player.jump();
 
@@ -237,9 +242,11 @@ window.game.core = function () {
 				if (_events.keyboard.pressed[_game.player.controlKeys.left])
 					_game.player.updateAcceleration (_game.player.playerAccelerationValues.rotation, -1);
 
-				if (_events.mouse.pressed[_game.player.mouseButtons.fire]) {
+				if (_events.mouse.pressed[_game.player.mouseButtons.fire])
 					_game.player.fire();
-				}
+
+				if (_events.keyboard.pressed[_game.player.controlKeys.reload])
+					_game.player.reload();
 			},
 			accelerate: function() {
 				// Calculate player coordinates by using current acceleration Euler radians from player's last rotation
@@ -277,6 +284,10 @@ window.game.core = function () {
 					_game.player.isGrounded = false;
 					_game.player.rigidBody.velocity.z = _game.player.jumpHeight;
 				}
+			},
+			reload: function() {
+				// reload animation/ reload delay
+				_game.player.canFire = true;
 			},
 			fire: function() {
 				if (_game.player.canFire) {
@@ -325,7 +336,7 @@ window.game.core = function () {
 				// Create a solid material for all objects in the world
 				_cannon.solidMaterial = _cannon.createPhysicsMaterial (new CANNON.Material ("solidMaterial"), 0, 0.1);
 
-				var floorHeight = 10;
+				var floorHeight = 20;
 
 				// Add a floor
 				_game.level.platform = _cannon.createRigidBody ({
@@ -345,9 +356,17 @@ window.game.core = function () {
 
 				//Add a wall
 				_game.level.walls.push (_cannon.createRigidBody ({
-					shape: new CANNON.Box (new CANNON.Vec3 (window.game.static.floorSize, floorHeight, window.game.static.floorSize / 2)),
+					shape: new CANNON.Box (new CANNON.Vec3 (
+						window.game.static.floorSize,
+						floorHeight,
+						window.game.static.floorSize / 4
+					)),
 					mass: 0,
-					position: new CANNON.Vec3 (0, window.game.static.floorSize + floorHeight, 0),
+					position: new CANNON.Vec3 (
+						0,
+						window.game.static.floorSize + floorHeight,
+						window.game.static.floorSize / 4
+					),
 					meshMaterial: new THREE.MeshLambertMaterial ({color: window.game.static.colors.green}),
 					physicsMaterial: _cannon.solidMaterial
 				}));
