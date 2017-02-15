@@ -18,7 +18,7 @@ window.game.cannon = function() {
 		bodyCount: 0,
 		friction: 0.0,
 		restitution: 0.0,
-		
+
 		gravity: -10, // Z gravity (approximation of 9,806)
 		timestep: 1 / 8, // Interval speed for Cannon.js to step the physics simulation
 		playerPhysicsMaterial: null, // Player physics material that will be assigned in game.core.js
