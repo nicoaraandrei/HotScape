@@ -432,8 +432,9 @@ window.game.core = function () {
 			_ui = window.game.ui();
 
 			_three.setupLights = function () {
+				_three.scene.fog = new THREE.FogExp2 (window.game.static.colors.fog, .001);
 				var pSun = new THREE.DirectionalLight (
-					window.game.static.colors.sunny, // color
+					window.game.static.colors.sun, // color
 					1 // intensity
 				);
 				pSun.castShadow = true;
