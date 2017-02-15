@@ -17,6 +17,7 @@ window.game.core = function () {
 			mass: 3,
 			orientationConstraint: null, // HingeConstraint - limit player's air-twisting
 			isGrounded: false,
+			canFire: true,
 			jumpHeight: 38,
 			defaultSpeed: 1.5,
 			defaultSpeedMax: 45,
@@ -49,14 +50,20 @@ window.game.core = function () {
 					speedMax: "rotationSpeedMax"
 				}
 			},
-			// Keyboard configuration for game.events.js (controlKeys must be associated to game.events.keyboard.keyCodes)
+			// game.events.*.keyCodes
 			controlKeys: {
 				forward: "w",
 				backward: "s",
 				left: "a",
 				right: "d",
 				jump: "space",
+				reload: "r",
 				run: "shift"
+			},
+			mouseButtons: {
+				fire: "leftC"/*,
+				nothingYet: "middleC"
+				*/
 			},
 
 			create: function() {
@@ -229,6 +236,10 @@ window.game.core = function () {
 
 				if (_events.keyboard.pressed[_game.player.controlKeys.left])
 					_game.player.updateAcceleration (_game.player.playerAccelerationValues.rotation, -1);
+
+				if (_events.mouse.pressed[_game.player.mouseButtons.fire]) {
+					_game.player.fire();
+				}
 			},
 			accelerate: function() {
 				// Calculate player coordinates by using current acceleration Euler radians from player's last rotation
@@ -265,6 +276,12 @@ window.game.core = function () {
 				if (_cannon.getCollisions (_game.player.rigidBody.index) && _game.player.isGrounded) {
 					_game.player.isGrounded = false;
 					_game.player.rigidBody.velocity.z = _game.player.jumpHeight;
+				}
+			},
+			fire: function() {
+				if (_game.player.canFire) {
+					_game.player.canFire = false;
+					console.log ("bullet fired");
 				}
 			},
 			updateOrientation: function() {
@@ -448,16 +465,16 @@ window.game.core = function () {
 				pSun.shadow.camera.fov = window.game.static.floorSize / 3;
 				pSun.shadow.camera.far = window.game.static.floorSize * 2;
 				pSun.position.set (
-					window.game.static.floorSize * 2 / 5,	// X
-					window.game.static.floorSize * 2 / 5,	// Z
-					window.game.static.floorSize			// Y
+					window.game.static.floorSize * 0.4,	// X
+					window.game.static.floorSize * 0.4,	// Z
+					window.game.static.floorSize		// Y
 				);
 				_three.scene.add (pSun);
 				_three.scene.add (new THREE.CameraHelper (pSun.shadow.camera));
 
 				var cSun = new THREE.HemisphereLight (
-					window.game.static.colors.sky,	// sky color
-					window.game.static.colors.dirt,	// ground color
+					window.game.static.colors.sky,
+					window.game.static.colors.dirt,
 					.6 // intensity
 				);
 				cSun.position.set (

@@ -15,6 +15,7 @@ window.game.events = function() {
 				32: "space",
 				65: "a",
 				68: "d",
+				82: "r",
 				83: "s",
 				87: "w"
 			},
@@ -27,36 +28,34 @@ window.game.events = function() {
 				_events.keyboard.pressed[_events.keyboard.keyCodes[event.keyCode]] = false;
 			}
 		},
-
+		mouse: {
+			keyCodes: {
+				1: "leftC",
+			//	3: "rightC", // the only one not in js/HotScape.js for increased performance
+				2: "middleC"
+			},
+			pressed: {},
+			onMouseDown: function (event) {
+				if (event.which == 3) {
+					console.log ("1st person");
+				} else
+					_events.mouse.pressed[_events.mouse.keyCodes[event.which]] = true;
+			},
+			onMouseUp: function (event) {
+				if (event.which == 3) {
+					console.log ("3rd person");
+				} else
+					_events.mouse.pressed[_events.mouse.keyCodes[event.which]] = false;
+			}
+		},
 		init: function() {
 			document.addEventListener ("keydown", _events.keyboard.onKeyDown, false);
 			document.addEventListener ("keyup", _events.keyboard.onKeyUp, false);
 			document.addEventListener ("contextmenu", event => event.preventDefault());
-			document.addEventListener ("mousedown", _events.keyboard.onMouseDown, false);
-			document.addEventListener ("mouseup", _events.keyboard.onMouseUp, false);
+			document.addEventListener ("mousedown", _events.mouse.onMouseDown, false);
+			document.addEventListener ("mouseup", _events.mouse.onMouseUp, false);
 		},
-		onKeyDown: function() {
-		},
-		onMouseDown: function (event) {
-			switch (event.which) {
-				case 1: // left
-				break;
-				case 2: // middle
-				break;
-				case 3: // right
-				break;
-			}
-		},
-		onMouseUp: function (event) {
-			switch (event.which) {
-				case 1: // left
-				break;
-				case 2: // middle
-				break;
-				case 3: // right
-				break;
-			}
-		}
+		onKeyDown: function() {}
 	};
 
 	return _events;

@@ -17,6 +17,7 @@
 				S &rarr; Backward<br>
 				A &rarr; Left<br>
 				D &rarr; Right<br>
+				R &rarr; Reload<br>
 				Space &rarr; Jump<br>
 				Shift &rarr; Run
 			</p>
@@ -49,7 +50,7 @@
 				window.gameInstance = window.game.core();
 				window.gameInstance.init ({
 					domContainer: document.querySelector ("#game"),
-					rendererClearColor: window.game.static.white
+					rendererClearColor: window.game.static.sky
 				});
 			} else
 				Detector.addGetWebGLMessage();
