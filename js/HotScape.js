@@ -164,16 +164,30 @@ window.game.core = function () {
 				_game.player.checkGameOver();
 			},
 			updateCamera: function() {
-				_game.player.mesh.visible = !_game.player.firstPerson;
-				// Calculate camera coordinates by using Euler radians from player's last rotation
+				//	_game.player.mesh.visible = !_game.player.firstPerson;
 				_game.player.cameraCoords = window.game.helpers.polarToCartesian (
-					_game.player.cameraOffsetH / (_game.player.firstPerson ? 10 : 1),
+				//	_game.player.cameraOffsetH / (_game.player.firstPerson ? 100 : 1),
+					_game.player.firstPerson ? 1 : _game.player.cameraOffsetH,
 					_game.player.rotationRadians.z
 				);
 				_three.camera.position.copy (_game.player.cameraCoords);
 				_three.camera.position.z = _game.player.cameraOffsetV / (_game.player.firstPerson ? 6 : 1);
 				_three.camera.position.add (_game.player.mesh.position);
-				_three.camera.lookAt (_game.player.mesh.position);
+				// no need to compute sin & cos while in 3rd person
+				if (_game.player.firstPerson) {
+					var aim = new THREE.Vector3();
+					aim.copy (_game.player.mesh.position);
+					/*
+						the bigger the difference between coefficients of x & y,
+						the more visible is the (left-right) bobbing while rotating
+						![difference > 5] will make aiming/shooting rather hard for a FPS
+					*/
+					aim.x -= Math.cos (_game.player.rotationRadians.z) * 40;
+					aim.y -= Math.sin (_game.player.rotationRadians.z) * 40;
+					aim.z += 1; // height, not depth
+					_three.camera.lookAt (aim);
+				} else
+					_three.camera.lookAt (_game.player.mesh.position);
 			},
 			updateAcceleration: function (values, direction) {
 				// Distinguish between acceleration/rotation and forward/right (1) and backward/left (-1)
