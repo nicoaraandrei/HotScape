@@ -4,6 +4,35 @@ window.game.core = function () {
 		timeSpeed: 1.0,
 		timeSpeedMax: 1.0,
 		timeSpeedMin: 0.1,
+		deathReasons: {
+			generic: {
+				0:	"You died.",
+				1:	"That's not how it should end.",
+				2:	"Survive.",
+				3:	"Take frequent breaks!",
+				4:	"It's just a game."
+			//	5:	"Rule #1: it's never my fault"
+			},
+			collision: { // traps, bullets, etc
+				0:	"You could've dodged that."
+			//	1:	"The * is a spy" // Team Fortress 2
+			},
+			off: {
+					// multidirectional
+				0:	"Do a barrel roll!", // Star Fox 64
+				1:	"That wasn't flying, that was falling with style!", // Toy Story
+				2:	"To infinity and beyond.", // Toy Story
+				3:	"Jump up, jump up, and get down!", // House of Pain - Jump Around
+				4:	"The knack lies in learning how to throw yourself at the ground and miss.", // The Hitchhiker's Guide to the Galaxy
+				5:	"You're going too fast! HotScape should not be played while driving.", // Pokemon GO
+				6:	"Next time do a flip.",
+				7:	"Next time do a frontflip.",
+				8:	"Next time do a backflip.",
+					// sky only
+				9:	"Kiss the sky!", // Jimi Hendrix - Purple Haze (or Jason Derulo if that's your thing)
+				10:	"The sky is the limit!"
+			}
+		},
 		//collision filter group - must be power of 2
 		GROUP1 : 1, // platform
 		GROUP2 : 2, // player
@@ -146,7 +175,7 @@ window.game.core = function () {
 							).intersectBody (event.contact.bi).length > 0
 						);
 					if (event.with.tag == "trap")
-						_game.player.checkGameOver (true);
+						_game.player.checkGameOver ("trap");
 				});
 
 				//	if (event.with.collisionFilterGroup == _game.GROUP4)
@@ -330,8 +359,35 @@ window.game.core = function () {
 					);
 				}
 			},
-			checkGameOver: function (forceGameOver = false) {
-				if (_game.player.mesh.position.z <= -800 || forceGameOver) {
+			checkGameOver: function (reason = "") {
+				if (Math.abs (poz) > 800 || reason) {
+					var rndR = window.game.helpers.random,
+						deRe = _game.deathReasons,
+						poz = _game.player.mesh.position.z;
+					window.game.liv.deaths++;
+					switch (reason) {
+						case "trap":
+						case "bullet":
+							if (rndR (0, 1, 1))
+								reason = deRe.collision[0];
+							else
+								reason = deRe.generic[rndR (0, 2, 1)];
+						break;
+						default:
+							if (Math.abs (poz) > 800)
+								if (poz < 0)
+									if (rndR (0, 5, 1))
+										reason = deRe.off[rndR (0, 8, 1)];
+									else
+										reason = deRe.generic[rndR (0, 2, 1)];
+								else // if (poz > 0)
+									if (rndR (0, 5, 1))
+										reason = deRe.off[rndR (0, 10, 1)];
+									else
+										reason = deRe.generic[rndR (0, 2, 1)];
+						break;
+					}
+					_ui.replaceText ("reason", reason);
 					if (!_ui.hasClass ("infoboxLost", "fade-in")) {
 						_ui.removeClass ("infoboxLost", "fade-out");
 						_ui.fadeIn ("infoboxLost");
@@ -388,18 +444,18 @@ window.game.core = function () {
 				_game.level.traps.push (_cannon.createRigidBody ({
 					shape: new CANNON.Box (new CANNON.Vec3 (30, 30, 30)),
 					mass: 5,
-					position: new CANNON.Vec3 (-240, -200, 30 - 1),
+					position: new CANNON.Vec3 (-240, -200, 20),
 					meshMaterial: new THREE.MeshLambertMaterial ({color: window.game.static.colors.red}),
 					physicsMaterial: _cannon.solidMaterial
 				}));
 
-				_cannon.createRigidBody ({
+				_game.level.traps.push (_cannon.createRigidBody ({
 					shape: new CANNON.Box (new CANNON.Vec3 (30, 30, 30)),
 					mass: 5,
-					position: new CANNON.Vec3 (-300, -260, 90),
-					meshMaterial: new THREE.MeshLambertMaterial ({color: window.game.static.colors.cyan}),
+					position: new CANNON.Vec3 (-300, -260, 55),
+					meshMaterial: new THREE.MeshLambertMaterial ({color: window.game.static.colors.red}),
 					physicsMaterial: _cannon.solidMaterial
-				});
+				}));
 
 				_cannon.createRigidBody ({
 					shape: new CANNON.Box (new CANNON.Vec3 (30, 30, 30)),
@@ -425,7 +481,8 @@ window.game.core = function () {
 					physicsMaterial: _cannon.solidMaterial
 				});
 
-				_game.level.traps[0].tag = "trap";
+				for (var trapIndex = 0; trapIndex < _game.level.traps.length; trapIndex++)
+					_game.level.traps[trapIndex].tag = "trap";
 				// // Grid Helper
 				// var grid = new THREE.GridHelper (floorSize, floorSize / 10);
 				// grid.position.z = 0.5;
