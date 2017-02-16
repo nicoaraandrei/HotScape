@@ -20,3 +20,7 @@ window.game.static = {
 	},
 	floorSize: 400
 };
+
+window.game.liv = { // level-independent vars
+	deaths: 0
+};
