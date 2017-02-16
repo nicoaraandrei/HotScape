@@ -127,7 +127,7 @@ window.game.core = function () {
 				_game.player.body = new CANNON.Body ({
 					mass: _game.player.mass,
 					shape: _game.player.shape,
-					material: _cannon.createPhysicsMaterial (_cannon.playerPhysicsMaterial,0,0)
+					material: _cannon.createPhysicsMaterial (_cannon.playerPhysicsMaterial, 0, 0)
 				}
 				);
 				_game.player.body.position.set (40, 0, 50);
@@ -137,62 +137,34 @@ window.game.core = function () {
 				_game.player.mesh.castShadow = true;
 				_game.player.mesh.receiveShadow = false;
 
-
-
 				_game.player.body.collisionFilterGroup = _game.GROUP1;
 				_game.player.body.collisionFilterMask =  _game.GROUP1;
 
-				_game.player.body.angularFactor.set(0,0,0);
+				_game.player.body.angularFactor.setZero();
 
 				_game.player.body.tag = "player";
-				// Create a HingeConstraint to limit player's air-twisting - this needs improvement
-				_game.player.orientationConstraint = new CANNON.HingeConstraint (
-					_game.player.body,
-					_game.player.body,{
-					pivotA: new CANNON.Vec3 (0, 0, 0),
-					axisA: new CANNON.Vec3 (0, 0, 0),
-
-					pivotB: new CANNON.Vec3 (0, 0, 0),
-					axisB: new CANNON.Vec3 (0, 0, 0)
-					}
-				);
-				//_cannon.world.addConstraint (_game.player.orientationConstraint);
 
 				_game.player.body.postStep = function() {
 					// Reset player's angularVelocity to limit possible exceeding rotation and
-					_game.player.body.angularVelocity.z = 0;
-					_game.player.body.angularVelocity.y = 0;
-					_game.player.body.angularVelocity.x = 0;
+				//	_game.player.body.angularVelocity.setZero();
 					// update player's orientation afterwards
 					_game.player.updateOrientation();
 				};
 
 				// Collision event listener for the jump mechanism
 				_game.player.body.addEventListener ("collide", function (event) {
-					//console.log(event);
-					// Checks if player's is on ground
 					if (!_game.player.isGrounded) {
-						// Ray intersection test to check if player is colliding with an object beneath him
 						var contact = event.contact;
 						var contactNormal = new CANNON.Vec3();
 
-						if(contact.bi.id == _game.player.body.id)
-							contact.ni.negate(contactNormal);
+						if (contact.bi.id == _game.player.body.id)
+							contact.ni.negate (contactNormal);
 						else
-							contactNormal.copy(contact.ni);
-						if(contactNormal.dot(new CANNON.Vec3(0,0,1))>0)
-						{	
-							_game.player.isGrounded = true;
-						}
-						else {
-							_game.player.isGrounded = false;
-						}
+							contactNormal.copy (contact.ni);
+						_game.player.isGrounded = (contactNormal.dot (new CANNON.Vec3 (0, 0, 1)) > 0);
 					}
 
-
-
-					if (event.body.tag == "trap")
-						_game.player.checkGameOver ("trap");
+					_game.player.checkGameOver (event.body.tag);
 				});
 
 				//	if (event.with.collisionFilterGroup == _game.GROUP4)
@@ -274,21 +246,9 @@ window.game.core = function () {
 
 				if (_events.keyboard.pressed[_game.player.controlKeys.forward]) {
 					_game.player.updateAcceleration (_game.player.playerAccelerationValues.position,  1);
-
-					// Reset orientation in air
-					
-						// _game.player.body.quaternion.setFromAxisAngle (
-						// 	new CANNON.Vec3 (0, 0, 1),
-						// 	_game.player.rotationRadians.z
-						// );
-				//	if (_game.timeSpeed < _game.timeSpeedMax) {
-						_game.timeSpeed = 1.0;
-				//	}
-				} else {
-				//	if (_game.timeSpeed > _game.timeSpeedMin + 0.1) {
-						_game.timeSpeed = 0.1;
-				//	}
-				}
+					_game.timeSpeed = 1.0;
+				} else
+					_game.timeSpeed = 0.1;
 
 				if (_events.keyboard.pressed[_game.player.controlKeys.jump])
 					_game.player.jump();
@@ -433,13 +393,12 @@ window.game.core = function () {
 						floorHeight
 					)),
 					mass: 0,
-					position: new CANNON.Vec3 (0, 0, -20),
+					position: new CANNON.Vec3 (0, 0, floorHeight / -2),
 					meshMaterial: new THREE.MeshLambertMaterial ({color: window.game.static.colors.dirt}),
 					physicsMaterial: _cannon.solidMaterial
 				});
 				//_game.level.platform.collisionFilterGroup = _game.GROUP1;
 				//_game.level.platform.collisionFilterMask =  _game.GROUP1 | _game.GROUP2 | _game.GROUP3 | _game.GROUP4;
-
 
 				//Add a wall
 				_game.level.walls.push (_cannon.createBody ({
@@ -451,8 +410,8 @@ window.game.core = function () {
 					mass: 0,
 					position: new CANNON.Vec3 (
 						0,
-						window.game.static.floorSize + floorHeight,
-						window.game.static.floorSize / 4
+						window.game.static.floorSize,
+						window.game.static.floorSize / 5
 					),
 					meshMaterial: new THREE.MeshLambertMaterial ({color: window.game.static.colors.green}),
 					physicsMaterial: _cannon.solidMaterial
@@ -461,7 +420,7 @@ window.game.core = function () {
 				_game.level.traps.push (_cannon.createBody ({
 					shape: new CANNON.Box (new CANNON.Vec3 (30, 30, 30)),
 					mass: 5,
-					position: new CANNON.Vec3 (-240, -200, 20),
+					position: new CANNON.Vec3 (-240, -200, 90),
 					meshMaterial: new THREE.MeshLambertMaterial ({color: window.game.static.colors.red}),
 					physicsMaterial: _cannon.solidMaterial
 				}));
@@ -500,11 +459,6 @@ window.game.core = function () {
 
 				for (var trapIndex = 0; trapIndex < _game.level.traps.length; trapIndex++)
 					_game.level.traps[trapIndex].tag = "trap";
-				// Grid Helper
-				// var grid = new THREE.GridHelper (floorSize, floorSize / 10);
-				// grid.position.z = 0.5;
-				// grid.rotation.x = window.game.helpers.degToRad (90);
-				// _three.scene.add (grid);
 			}
 		},
 		init: function (options) {
