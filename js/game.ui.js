@@ -50,6 +50,15 @@ window.game.ui = function() {
 		hasClass: function (element, className) {
 			// Checks if a specified element contains the given class name
 			return _ui.elements[element].className.match (className);
+		},
+		replaceText: function (elementId, text = "", parentId) {
+			if (elementId && text) {
+				var parent = document.getElementById (parentId) || document.getElementById (elementId).parentNode;
+				var sp1 = document.createElement ("p");
+				sp1.id = elementId;
+				sp1.appendChild (document.createTextNode (text));
+				parent.replaceChild (sp1, (document.getElementById (elementId)));
+			}
 		}
 	};
 
