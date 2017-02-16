@@ -73,20 +73,21 @@ window.game.cannon = function() {
 			}
 			return false;
 		},
-		rotateOnAxis: function (rigidBody, axis, radians) {
+		rotateOnAxis: function (body, axis, radians) {
 			// Equivalent to THREE's Object3D.rotateOnAxis
 			var rotationQuaternion = new CANNON.Quaternion();
 			rotationQuaternion.setFromAxisAngle (axis, radians);
-			rigidBody.quaternion = rotationQuaternion.mult (rigidBody.quaternion);
+			body.quaternion = rotationQuaternion.mult (body.quaternion);
 		},
-		createRigidBody: function (options) {
+		createBody: function (options) {
 			// Creates a new rigid body based on specific options
-			var rigidBody = new CANNON.RigidBody (
-				options.mass,
-				options.shape,
-				options.physicsMaterial
+			var body = new CANNON.Body ({
+				mass: options.mass,
+				shape: options.shape,
+				material: options.physicsMaterial
+			}
 			);
-			rigidBody.position.set (
+			body.position.set (
 				options.position.x,
 				options.position.y,
 				options.position.z
@@ -94,21 +95,22 @@ window.game.cannon = function() {
 
 			// Apply a rotation if set by using Quaternions
 			if (options.rotation) {
-				rigidBody.quaternion.setFromAxisAngle (options.rotation[0], options.rotation[1]);
+				body.quaternion.setFromAxisAngle (options.rotation[0], options.rotation[1]);
 			}
-
 			// Add the entity to the scene and world
-			_cannon.addVisual (rigidBody, options.meshMaterial, options.customMesh);
-			return rigidBody;
+			_cannon.addVisual (body, options.meshMaterial, options.customMesh);
+			return body;
 		},
 		createPhysicsMaterial: function (material, friction, restitution) {
 			// Create a new material and add a Cannon ContactMaterial to the world always using _cannon.playerPhysicsMaterial as basis
 			var physicsMaterial = material || new CANNON.Material();
 			var contactMaterial = new CANNON.ContactMaterial (
 				physicsMaterial,
-				_cannon.playerPhysicsMaterial,
-				friction || _cannon.friction,
-				restitution || _cannon.restitution
+				_cannon.playerPhysicsMaterial,{
+				friction: friction || _cannon.friction,
+				restitution: restitution || _cannon.restitution,
+				contactEquationRelaxation : 1000
+			}
 			);
 
 			_cannon.world.addContactMaterial (contactMaterial);
@@ -118,10 +120,9 @@ window.game.cannon = function() {
 		addVisual: function (body, material, customMesh) {
 			// Initialize the mesh or use a provided custom mesh
 			var mesh = customMesh || null;
-
 			// Check for rigid body and convert the shape to a THREE.js mesh representation
-			if (body instanceof CANNON.RigidBody && !mesh) {
-				mesh = _cannon.shape2mesh(body.shape, material);
+			if (body instanceof CANNON.Body && !mesh) {
+				mesh = _cannon.shape2mesh(body.shapes[0], material);
 			}
 
 			// Populate the bodies and visuals arrays
@@ -192,11 +193,11 @@ window.game.cannon = function() {
 				var body = _cannon.bodies[i],
 					visual = _cannon.visuals[i];
 
-				body.position.copy (visual.position);
+				visual.position.copy (body.position);
 
 				// Update the Quaternions
 				if (body.quaternion)
-					body.quaternion.copy (visual.quaternion);
+					visual.quaternion.copy (body.quaternion);
 			}
 
 			// Perform a simulation step

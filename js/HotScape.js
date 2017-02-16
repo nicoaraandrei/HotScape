@@ -1,7 +1,7 @@
 window.game = window.game || {};
 window.game.core = function () {
 	_game = {
-		timeSpeed: 1.0,
+		timeSpeed: 0.1,
 		timeSpeedMax: 1.0,
 		timeSpeedMin: 0.1,
 		deathReasons: {
@@ -42,7 +42,7 @@ window.game.core = function () {
 			model: null,
 			mesh: null,
 			shape: null,
-			rigidBody: null,
+			body: null,
 			mass: 3,
 			orientationConstraint: null, // HingeConstraint - limit player's air-twisting
 			isGrounded: false,
@@ -124,57 +124,74 @@ window.game.core = function () {
 
 				// Create the shape, mesh and rigid body for the player character and assign the physics material to it
 				_game.player.shape = new CANNON.Box (_game.player.model.halfExtents);
-				_game.player.rigidBody = new CANNON.RigidBody (
-					_game.player.mass,
-					_game.player.shape,
-					_cannon.createPhysicsMaterial (_cannon.playerPhysicsMaterial)
+				_game.player.body = new CANNON.Body ({
+					mass: _game.player.mass,
+					shape: _game.player.shape,
+					material: _cannon.createPhysicsMaterial (_cannon.playerPhysicsMaterial,0,0)
+				}
 				);
-				_game.player.rigidBody.position.set (0, 0, 50);
-				_game.player.mesh = _cannon.addVisual (_game.player.rigidBody, null, _game.player.model.mesh);
+				_game.player.body.position.set (40, 0, 50);
+				_game.player.mesh = _cannon.addVisual (_game.player.body, null, _game.player.model.mesh);
 
 				// Enable shadows
 				_game.player.mesh.castShadow = true;
 				_game.player.mesh.receiveShadow = false;
 
-				//freeze exceeding rotation
-				_game.player.rigidBody.inertia.set (0, 0, 0);
-				_game.player.rigidBody.invInertia.set (0, 0, 0);
 
-				_game.player.rigidBody.collisionFilterGroup = _game.GROUP1;
-				_game.player.rigidBody.collisionFilterMask =  _game.GROUP1;
 
+				_game.player.body.collisionFilterGroup = _game.GROUP1;
+				_game.player.body.collisionFilterMask =  _game.GROUP1;
+
+				_game.player.body.angularFactor.set(0,0,0);
+
+				_game.player.body.tag = "player";
 				// Create a HingeConstraint to limit player's air-twisting - this needs improvement
 				_game.player.orientationConstraint = new CANNON.HingeConstraint (
-					_game.player.rigidBody,
-					new CANNON.Vec3 (0, 0, 0),
-					new CANNON.Vec3 (0, 0, 1),
-					_game.player.rigidBody,
-					new CANNON.Vec3 (0, 0, 1),
-					new CANNON.Vec3 (0, 0, 1)
-				);
-				_cannon.world.addConstraint (_game.player.orientationConstraint);
+					_game.player.body,
+					_game.player.body,{
+					pivotA: new CANNON.Vec3 (0, 0, 0),
+					axisA: new CANNON.Vec3 (0, 0, 0),
 
-				_game.player.rigidBody.postStep = function() {
+					pivotB: new CANNON.Vec3 (0, 0, 0),
+					axisB: new CANNON.Vec3 (0, 0, 0)
+					}
+				);
+				//_cannon.world.addConstraint (_game.player.orientationConstraint);
+
+				_game.player.body.postStep = function() {
 					// Reset player's angularVelocity to limit possible exceeding rotation and
-					//_game.player.rigidBody.angularVelocity.z = 0;
-					//_game.player.rigidBody.angularVelocity.y = 0;
-					//_game.player.rigidBody.angularVelocity.x = 0;
+					_game.player.body.angularVelocity.z = 0;
+					_game.player.body.angularVelocity.y = 0;
+					_game.player.body.angularVelocity.x = 0;
 					// update player's orientation afterwards
 					_game.player.updateOrientation();
 				};
 
 				// Collision event listener for the jump mechanism
-				_game.player.rigidBody.addEventListener ("collide", function (event) {
+				_game.player.body.addEventListener ("collide", function (event) {
+					//console.log(event);
 					// Checks if player's is on ground
-					if (!_game.player.isGrounded)
+					if (!_game.player.isGrounded) {
 						// Ray intersection test to check if player is colliding with an object beneath him
-						_game.player.isGrounded = (
-							new CANNON.Ray (
-								_game.player.mesh.position,
-								new CANNON.Vec3 (0, 0, -1)
-							).intersectBody (event.contact.bi).length > 0
-						);
-					if (event.with.tag == "trap")
+						var contact = event.contact;
+						var contactNormal = new CANNON.Vec3();
+
+						if(contact.bi.id == _game.player.body.id)
+							contact.ni.negate(contactNormal);
+						else
+							contactNormal.copy(contact.ni);
+						if(contactNormal.dot(new CANNON.Vec3(0,0,1))>0)
+						{	
+							_game.player.isGrounded = true;
+						}
+						else {
+							_game.player.isGrounded = false;
+						}
+					}
+
+
+
+					if (event.body.tag == "trap")
 						_game.player.checkGameOver ("trap");
 				});
 
@@ -182,7 +199,7 @@ window.game.core = function () {
 				// 		console.dir (event);
 				//	else
 				//		console.log (event.with.collisionFilterGroup);
-				//	_game.player.rigidBody.addEventListener ("intersect", );
+				//	_game.player.body.addEventListener ("intersect", );
 			},
 			update: function() {
 				_game.player.processUserInput();
@@ -259,18 +276,18 @@ window.game.core = function () {
 					_game.player.updateAcceleration (_game.player.playerAccelerationValues.position,  1);
 
 					// Reset orientation in air
-					if (!_cannon.getCollisions (_game.player.rigidBody.index))
-						_game.player.rigidBody.quaternion.setFromAxisAngle (
-							new CANNON.Vec3 (0, 0, 1),
-							_game.player.rotationRadians.z
-						);
-					if (_game.timeSpeed < _game.timeSpeedMax) {
-						_game.timeSpeed += 0.1;
-					}
+					
+						// _game.player.body.quaternion.setFromAxisAngle (
+						// 	new CANNON.Vec3 (0, 0, 1),
+						// 	_game.player.rotationRadians.z
+						// );
+				//	if (_game.timeSpeed < _game.timeSpeedMax) {
+						_game.timeSpeed = 1.0;
+				//	}
 				} else {
-					if (_game.timeSpeed > _game.timeSpeedMin + 0.1) {
-						_game.timeSpeed -= 0.1;
-					}
+				//	if (_game.timeSpeed > _game.timeSpeedMin + 0.1) {
+						_game.timeSpeed = 0.1;
+				//	}
 				}
 
 				if (_events.keyboard.pressed[_game.player.controlKeys.jump])
@@ -299,10 +316,10 @@ window.game.core = function () {
 				);
 
 				// Set actual XYZ velocity by using calculated Cartesian coordinates
-				_game.player.rigidBody.velocity.set (
+				_game.player.body.velocity.set (
 					_game.player.playerCoords.x,
 					_game.player.playerCoords.y,
-					_game.player.rigidBody.velocity.z
+					_game.player.body.velocity.z
 				);
 
 				// Damping
@@ -312,7 +329,7 @@ window.game.core = function () {
 			rotate: function() {
 				// Rotate player around Z axis
 				_cannon.rotateOnAxis (
-					_game.player.rigidBody,
+					_game.player.body,
 					new CANNON.Vec3 (0, 0, 1),
 					_game.player.rotationAcceleration
 				);
@@ -323,9 +340,9 @@ window.game.core = function () {
 			},
 			jump: function() {
 				// Perform a jump if player has collisions and the collision contact is beneath him (ground)
-				if (_cannon.getCollisions (_game.player.rigidBody.index) && _game.player.isGrounded) {
+				if (_game.player.isGrounded) {
 					_game.player.isGrounded = false;
-					_game.player.rigidBody.velocity.z = _game.player.jumpHeight;
+					_game.player.body.velocity.z = _game.player.jumpHeight;
 				}
 			},
 			reload: function() {
@@ -340,20 +357,20 @@ window.game.core = function () {
 			},
 			updateOrientation: function() {
 				// Convert player's Quaternion to Euler radians and save them to _game.player.rotationRadians
-				_game.player.rotationRadians = new THREE.Euler().setFromQuaternion (_game.player.rigidBody.quaternion);
+				_game.player.rotationRadians = new THREE.Euler().setFromQuaternion (_game.player.body.quaternion);
 
 				// Round angles
 				_game.player.rotationAngleX = Math.round (window.game.helpers.radToDeg (_game.player.rotationRadians.x));
 				_game.player.rotationAngleY = Math.round (window.game.helpers.radToDeg (_game.player.rotationRadians.y));
 
 				// Prevent player from being upside-down on a slope - this needs improvement
-				if ((_cannon.getCollisions (_game.player.rigidBody.index) && (
+				if ((_cannon.getCollisions (_game.player.body.index) && (
 					(_game.player.rotationAngleX >=  90) ||
 					(_game.player.rotationAngleX <= -90) ||
 					(_game.player.rotationAngleY >=  90) ||
 					(_game.player.rotationAngleY <= -90)))) {
 					// Reset orientation
-					_game.player.rigidBody.quaternion.setFromAxisAngle (
+					_game.player.body.quaternion.setFromAxisAngle (
 						new CANNON.Vec3 (0, 0, 1),
 						_game.player.rotationRadians.z
 					);
@@ -409,14 +426,14 @@ window.game.core = function () {
 				var floorHeight = 20;
 
 				// Add a floor
-				_game.level.platform = _cannon.createRigidBody ({
+				_game.level.platform = _cannon.createBody ({
 					shape: new CANNON.Box (new CANNON.Vec3 (
 						window.game.static.floorSize,
 						window.game.static.floorSize,
 						floorHeight
 					)),
 					mass: 0,
-					position: new CANNON.Vec3 (0, 0, -floorHeight/2),
+					position: new CANNON.Vec3 (0, 0, -20),
 					meshMaterial: new THREE.MeshLambertMaterial ({color: window.game.static.colors.dirt}),
 					physicsMaterial: _cannon.solidMaterial
 				});
@@ -425,7 +442,7 @@ window.game.core = function () {
 
 
 				//Add a wall
-				_game.level.walls.push (_cannon.createRigidBody ({
+				_game.level.walls.push (_cannon.createBody ({
 					shape: new CANNON.Box (new CANNON.Vec3 (
 						window.game.static.floorSize,
 						floorHeight,
@@ -441,7 +458,7 @@ window.game.core = function () {
 					physicsMaterial: _cannon.solidMaterial
 				}));
 				//Add some boxes
-				_game.level.traps.push (_cannon.createRigidBody ({
+				_game.level.traps.push (_cannon.createBody ({
 					shape: new CANNON.Box (new CANNON.Vec3 (30, 30, 30)),
 					mass: 5,
 					position: new CANNON.Vec3 (-240, -200, 20),
@@ -449,7 +466,7 @@ window.game.core = function () {
 					physicsMaterial: _cannon.solidMaterial
 				}));
 
-				_game.level.traps.push (_cannon.createRigidBody ({
+				_game.level.traps.push (_cannon.createBody ({
 					shape: new CANNON.Box (new CANNON.Vec3 (30, 30, 30)),
 					mass: 5,
 					position: new CANNON.Vec3 (-300, -260, 55),
@@ -457,7 +474,7 @@ window.game.core = function () {
 					physicsMaterial: _cannon.solidMaterial
 				}));
 
-				_cannon.createRigidBody ({
+				_cannon.createBody ({
 					shape: new CANNON.Box (new CANNON.Vec3 (30, 30, 30)),
 					mass: 5,
 					position: new CANNON.Vec3 (-180, -200, 150),
@@ -465,7 +482,7 @@ window.game.core = function () {
 					physicsMaterial: _cannon.solidMaterial
 				});
 
-				_game.level.objects.push (_cannon.createRigidBody ({
+				_game.level.objects.push (_cannon.createBody ({
 					shape: new CANNON.Box (new CANNON.Vec3 (30, 30, 30)),
 					mass: 5,
 					position: new CANNON.Vec3 (-120, -140, 210),
@@ -473,7 +490,7 @@ window.game.core = function () {
 					physicsMaterial: _cannon.solidMaterial
 				}));
 
-				_cannon.createRigidBody ({
+				_cannon.createBody ({
 					shape: new CANNON.Box (new CANNON.Vec3 (30, 30, 30)),
 					mass: 5,
 					position: new CANNON.Vec3 (-60, -80, 270),
@@ -483,7 +500,7 @@ window.game.core = function () {
 
 				for (var trapIndex = 0; trapIndex < _game.level.traps.length; trapIndex++)
 					_game.level.traps[trapIndex].tag = "trap";
-				// // Grid Helper
+				// Grid Helper
 				// var grid = new THREE.GridHelper (floorSize, floorSize / 10);
 				// grid.position.z = 0.5;
 				// grid.rotation.x = window.game.helpers.degToRad (90);
