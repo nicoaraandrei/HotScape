@@ -21,7 +21,7 @@ window.game.helpers = {
 		return degrees * Math.PI / 180;
 	},
 	random: function (min, max, round) {
-		return round ? (Math.floor (Math.random() * (max + 1)) + min) : (Math.random() * max) + min;
+		return round ? (Math.floor (Math.random() * (max - min + 1)) + min) : (Math.random() * max) + min;
 	},
 	cloneObject: function (obj) {
 		var copy;
