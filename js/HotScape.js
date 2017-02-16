@@ -360,10 +360,10 @@ window.game.core = function () {
 				}
 			},
 			checkGameOver: function (reason = "") {
+				var poz = _game.player.mesh.position.z;
 				if (Math.abs (poz) > 800 || reason) {
 					var rndR = window.game.helpers.random,
-						deRe = _game.deathReasons,
-						poz = _game.player.mesh.position.z;
+						deRe = _game.deathReasons;
 					window.game.liv.deaths++;
 					switch (reason) {
 						case "trap":
