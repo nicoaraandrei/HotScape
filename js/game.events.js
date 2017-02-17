@@ -23,7 +23,6 @@ window.game.events = function() {
 			},
 			onKeyUp: function (event) {
 				_events.keyboard.pressed[_events.keyboard.keyCodes[event.keyCode]] = false;
-				_events.onKeyUp();
 			}
 		},
 		mouse: {
@@ -35,6 +34,7 @@ window.game.events = function() {
 			pressed: {},
 			onMouseDown: function (event) {
 				_events.mouse.pressed[_events.mouse.keyCodes[event.which]] = true;
+				_events.onMouseDown();
 			},
 			onMouseUp: function (event) {
 				_events.mouse.pressed[_events.mouse.keyCodes[event.which]] = false;
@@ -47,7 +47,7 @@ window.game.events = function() {
 			document.addEventListener ("mousedown", _events.mouse.onMouseDown, false);
 			document.addEventListener ("mouseup", _events.mouse.onMouseUp, false);
 		},
-		onKeyUp: function() {}
+		onMouseDown: function() {}
 	};
 
 	return _events;

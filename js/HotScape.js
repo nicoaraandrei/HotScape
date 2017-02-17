@@ -556,7 +556,7 @@ window.game.core = function () {
 			_three.renderer.shadowMap.enabled = true;
 			_three.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-			_events.onKeyUp = function() {
+			_events.onMouseDown = function() {
 				if (!_ui.hasClass ("infoboxIntro", "fade-out"))
 					_ui.fadeOut ("infoboxIntro");
 				if (_ui.hasClass ("infoboxLost", "fade-in")) {
