@@ -3,9 +3,7 @@
  *
  * A basic input system for keyboard controls
  */
-
 window.game = window.game || {};
-
 window.game.events = function() {
 	var _events = {
 		keyboard: {
@@ -22,10 +20,10 @@ window.game.events = function() {
 			pressed: {}, // will contain the pressed key in real-time
 			onKeyDown: function (event) {
 				_events.keyboard.pressed[_events.keyboard.keyCodes[event.keyCode]] = true;
-				_events.onKeyDown();
 			},
 			onKeyUp: function (event) {
 				_events.keyboard.pressed[_events.keyboard.keyCodes[event.keyCode]] = false;
+				_events.onKeyUp();
 			}
 		},
 		mouse: {
@@ -49,7 +47,7 @@ window.game.events = function() {
 			document.addEventListener ("mousedown", _events.mouse.onMouseDown, false);
 			document.addEventListener ("mouseup", _events.mouse.onMouseUp, false);
 		},
-		onKeyDown: function() {}
+		onKeyUp: function() {}
 	};
 
 	return _events;
