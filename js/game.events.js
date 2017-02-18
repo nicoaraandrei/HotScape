@@ -43,6 +43,9 @@ window.game.events = function() {
 				// disable zoom by ctrl+wheel // still possible by other means, like ctrl+ +/-
 				event.preventDefault();
 				//console.log (event);
+			},
+			click: function (event) {
+				_game.player.fire();
 			}
 		},
 		init: function() {
@@ -52,6 +55,7 @@ window.game.events = function() {
 			document.addEventListener ("mousedown", _events.mouse.onMouseDown, false);
 			document.addEventListener ("mouseup", _events.mouse.onMouseUp, false);
 			document.addEventListener ("wheel", _events.mouse.onWheel, false);
+			document.addEventListener ("click", _events.mouse.click, false);
 		},
 		onMouseDown: function() {}
 	};

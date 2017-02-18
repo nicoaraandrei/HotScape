@@ -1,6 +1,7 @@
 window.game = window.game || {};
 window.game.core = function () {
 	_game = {
+		bullets: [],
 		timeSpeed: 0.1,
 		timeSpeedMax: 1.0,
 		timeSpeedMin: 0.1,
@@ -137,7 +138,7 @@ window.game.core = function () {
 				_game.player.mesh.castShadow = true;
 				_game.player.mesh.receiveShadow = false;
 
-				_game.player.body.collisionFilterGroup = _game.GROUP1;
+				_game.player.body.collisionFilterGroup = _game.GROUP2;
 				_game.player.body.collisionFilterMask =  _game.GROUP1;
 
 				_game.player.body.angularFactor.setZero();
@@ -310,10 +311,53 @@ window.game.core = function () {
 				_game.player.canFire = true;
 			},
 			fire: function() {
+				var shootVelo = 200;
 				if (_game.player.canFire) {
-					_game.player.canFire = false;
-					console.log ("bullet fired");
-				}
+					if(_game.bullets.length==20) {
+						_three.scene.remove(_game.bullets[0].visualref);
+						_cannon.world.remove(_game.bullets[0]);
+						_game.bullets.splice(0,1);
+					}
+                    var x = _game.player.body.position.x;
+                    var y = _game.player.body.position.y;
+                    var z = _game.player.body.position.z;
+                    var ballShape = new CANNON.Sphere(4);
+                    var material = new THREE.MeshLambertMaterial( { color: 0xdddddd } );
+                    
+                    
+                    var shootDirection = new THREE.Vector3();
+                    var vector = shootDirection;
+            		                    shootDirection.set(-1,0,0);
+
+    	        	//vector.unproject(_three.camera);
+                	vector.applyQuaternion(_game.player.body.quaternion);
+                	var ray = new THREE.Ray(_game.player.body.position, vector.normalize() );
+               	 	shootDirection.x = ray.direction.x;
+                	shootDirection.y = ray.direction.y;
+                	shootDirection.z = ray.direction.z;
+
+                	 // Move the ball outside the player sphere
+                    x += shootDirection.x*4;
+                    y += shootDirection.y;
+                    z += shootDirection.z+10;
+
+
+                    var ball = _cannon.createBody ({
+					shape: ballShape,
+					mass: 200,
+					position: new CANNON.Vec3 (x, y, z),
+					meshMaterial: material,
+					physicsMaterial: _cannon.solidMaterial
+					});
+					ball.collisionFilterGroup = _game.GROUP4;
+					ball.collisionFilterMask =  _game.GROUP1;
+
+					ball.velocity.set(  shootDirection.x * shootVelo,
+                                            shootDirection.y * shootVelo,
+                                            shootDirection.z * shootVelo);
+					}
+
+					_game.bullets.push(ball);
 			},
 			updateOrientation: function() {
 				// Convert player's Quaternion to Euler radians and save them to _game.player.rotationRadians
