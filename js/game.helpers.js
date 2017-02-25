@@ -3,9 +3,7 @@
  *
  * A collection of useful math and object helpers
  */
-
 window.game = window.game || {};
-
 window.game.helpers = {
 	// Convert from polar coordinates to Cartesian coordinates using length and radian
 	polarToCartesian: function (vectorLength, vectorDirection) {
@@ -23,6 +21,13 @@ window.game.helpers = {
 	random: function (min, max, round) {
 		return round ? (Math.floor (Math.random() * (max - min + 1)) + min) : (Math.random() * max) + min;
 	},
+	signOf: function (num) {
+		/** also:
+			-0, NaN (+ string, array, object, 'false') -> 0
+			'true' -> 1
+		**/
+		return (num > 0) - (num < 0);
+	},
 	cloneObject: function (obj) {
 		var copy;
 
@@ -39,7 +44,7 @@ window.game.helpers = {
 		if (obj instanceof Array) {
 			copy = [];
 			for (var i = 0, len = obj.length; i < len; i++)
-				copy[i] = window.game.helpers.cloneObject(obj[i]);
+				copy[i] = window.game.helpers.cloneObject (obj[i]);
 
 			return copy;
 		}

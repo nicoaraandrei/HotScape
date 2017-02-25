@@ -13,6 +13,8 @@ window.game.events = function() {
 				32: "space",
 				65: "a",
 				68: "d",
+				77: "m", // todo: remove before merging to master
+				80: "p",
 				82: "r",
 				83: "s",
 				87: "w"
@@ -28,24 +30,25 @@ window.game.events = function() {
 		mouse: {
 			keyCodes: {
 				1: "leftC",
-				2: "middleC",
+			//	2: "middleC",
 				3: "rightC"
 			},
 			pressed: {},
 			onMouseDown: function (event) {
 				_events.mouse.pressed[_events.mouse.keyCodes[event.which]] = true;
-				_events.onMouseDown();
+				_events.onMouseDown(); // needed to dismiss notifications
 			},
 			onMouseUp: function (event) {
 				_events.mouse.pressed[_events.mouse.keyCodes[event.which]] = false;
 			},
 			onWheel: function (event) {
-				// disable zoom by ctrl+wheel // still possible by other means, like ctrl+ +/-
+				// disable zoom by ctrl & wheel // still possible by other means, like ctrl & +/-
 				event.preventDefault();
 				//console.log (event);
 			},
 			click: function (event) {
-				_game.player.fire();
+				if (!window.game.liv.paused && event.which == 1)
+					_game.player.fire();
 			}
 		},
 		init: function() {

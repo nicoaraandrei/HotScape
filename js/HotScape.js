@@ -3,8 +3,6 @@ window.game.core = function () {
 	_game = {
 		bullets: [],
 		timeSpeed: 0.1,
-		timeSpeedMax: 1.0,
-		timeSpeedMin: 0.1,
 		deathReasons: {
 			generic: {
 				0:	"You died.",
@@ -34,6 +32,7 @@ window.game.core = function () {
 				10:	"The sky is the limit!"
 			}
 		},
+		intervals : [],
 		//collision filter group - must be power of 2
 		GROUP1 : 1, // platform
 		GROUP2 : 2, // player
@@ -60,25 +59,27 @@ window.game.core = function () {
 			rotationAngleY: null,
 			damping: 0.9, // Deceleration (0.8~0.98 are recommended)
 			rotationDamping: 0.8,
-			acceleration: 0,
+			accelerationX: 0,
+			accelerationY: 0,
 			rotationAcceleration: 0,
 			playerCoords: null,
 			cameraCoords: null,
 			cameraOffsetH: 240,
 			cameraOffsetV: 140,
-			firstPerson: false,
+			controls: null,
+			time: Date.now(),
 
 			// Enum for an easier method access to acceleration/rotation
-			playerAccelerationValues: {
-				position: {
-					acceleration: "acceleration",
+			accelValues: {
+				posX: {
+					acceleration: "accelerationX",
 					speed: "speed",
 					speedMax: "speedMax"
 				},
-				rotation: {
-					acceleration: "rotationAcceleration",
-					speed: "rotationSpeed",
-					speedMax: "rotationSpeedMax"
+				posY: {
+					acceleration: "accelerationY",
+					speed: "speed",
+					speedMax: "speedMax"
 				}
 			},
 			// game.events.*.keyCodes
@@ -89,12 +90,13 @@ window.game.core = function () {
 				right: "d",
 				jump: "space",
 				reload: "r",
-				run: "shift"
+				run: "shift",
+				master: "m", // todo: remove before merging to master
+				pause: "p"
 			},
 			mouseButtons: {
 				fire: "leftC",
-				//nothingYet: "middleC",
-				aim: "rightC"
+				dismiss: "rightC"
 			},
 
 			create: function() {
@@ -104,11 +106,11 @@ window.game.core = function () {
 				//	// Create a player character based on an imported 3D model that was already loaded as JSON into game.models.player
 				//	_game.player.model = _three.createModel (window.game.models.player, 12, [
 				// 		new THREE.MeshLambertMaterial ({
-				//			color: window.game.static.colors.cyan,
+				//			color: _static.colors.cyan,
 				//			shading: THREE.FlatShading
 				//		}),
 				// 		new THREE.MeshLambertMaterial ({
-				//			color: window.game.static.colors.green,
+				//			color: _static.colors.green,
 				//			shading: THREE.FlatShading
 				//		})
 				//	]);
@@ -129,14 +131,15 @@ window.game.core = function () {
 					mass: _game.player.mass,
 					shape: _game.player.shape,
 					material: _cannon.createPhysicsMaterial (_cannon.playerPhysicsMaterial, 0, 0)
-				}
-				);
-				_game.player.body.position.set (40, 0, 50);
+				});
 				_game.player.mesh = _cannon.addVisual (_game.player.body, null, _game.player.model.mesh);
 
 				// Enable shadows
 				_game.player.mesh.castShadow = true;
 				_game.player.mesh.receiveShadow = false;
+
+				// Spawn location
+				_game.player.body.position.set (_static.floorSize - _static.floorHeight, 2 * _static.floorHeight - _static.floorSize, _static.floorHeight * 3 / 2);
 
 				_game.player.body.collisionFilterGroup = _game.GROUP2;
 				_game.player.body.collisionFilterMask =  _game.GROUP1;
@@ -145,9 +148,11 @@ window.game.core = function () {
 
 				_game.player.body.tag = "player";
 
+				_game.player.controls = new PointerLockControls (_three.camera, _game.player.body);
+				_three.scene.add (_game.player.controls.getObject());
+				_game.player.controls.enabled = true;
+
 				_game.player.body.postStep = function() {
-					// Reset player's angularVelocity to limit possible exceeding rotation and
-				//	_game.player.body.angularVelocity.setZero();
 					// update player's orientation afterwards
 					_game.player.updateOrientation();
 				};
@@ -164,7 +169,6 @@ window.game.core = function () {
 							contactNormal.copy (contact.ni);
 						_game.player.isGrounded = (contactNormal.dot (new CANNON.Vec3 (0, 0, 1)) > 0);
 					}
-
 					_game.player.checkGameOver (event.body.tag);
 				});
 
@@ -183,109 +187,74 @@ window.game.core = function () {
 				_game.player.checkGameOver();
 			},
 			updateCamera: function() {
-				//	_game.player.mesh.visible = !_game.player.firstPerson;
-				_game.player.cameraCoords = window.game.helpers.polarToCartesian (
-				//	_game.player.cameraOffsetH / (_game.player.firstPerson ? 100 : 1),
-					_game.player.firstPerson ? 1 : _game.player.cameraOffsetH,
-					_game.player.rotationRadians.z
-				);
-				_three.camera.position.copy (_game.player.cameraCoords);
-				_three.camera.position.z = _game.player.cameraOffsetV / (_game.player.firstPerson ? 6 : 1);
-				_three.camera.position.add (_game.player.mesh.position);
-				// no need to compute sin & cos while in 3rd person
-				if (_game.player.firstPerson) {
-					var aim = new THREE.Vector3();
-					aim.copy (_game.player.mesh.position);
-					/*
-						the bigger the difference between coefficients of x & y,
-						the more visible is the (left-right) bobbing while rotating
-						![difference > 5] will make aiming/shooting rather hard for a FPS
-					*/
-					aim.x -= Math.cos (_game.player.rotationRadians.z) * 40;
-					aim.y -= Math.sin (_game.player.rotationRadians.z) * 40;
-					aim.z += 1; // height, not depth
-					_three.camera.lookAt (aim);
-				} else
-					_three.camera.lookAt (_game.player.mesh.position);
+				_game.player.controls.update (Date.now() - _game.player.time);
+				_game.player.time = Date.now();
 			},
-			updateAcceleration: function (values, direction) {
-				// Distinguish between acceleration/rotation and forward/right (1) and backward/left (-1)
+			updateAcceleration: function (acc, direction) {
 				if (direction === 1) {
 					// Forward/right
-					if (_game.player[values.acceleration] > -_game.player[values.speedMax]) {
-						if (_game.player[values.acceleration] >= _game.player[values.speedMax] / 2) {
-							_game.player[values.acceleration] = -(_game.player[values.speedMax] / 4);
+					if (_game.player[acc] > -_game.player.speedMax) {
+						if (_game.player[acc] >= _game.player.speedMax / 2) {
+							_game.player[acc] = - _game.player.speedMax / 4;
 						} else {
-							_game.player[values.acceleration] -= _game.player[values.speed];
+							_game.player[acc] -= _game.player.speed;
 						}
 					} else {
-						_game.player[values.acceleration] = -_game.player[values.speedMax];
+						_game.player[acc] = - _game.player.speedMax;
 					}
 				} else {
 					// Backward/left
-					if (_game.player[values.acceleration] < _game.player[values.speedMax]) {
-						if (_game.player[values.acceleration] <= -(_game.player[values.speedMax] / 2)) {
-							_game.player[values.acceleration] = _game.player[values.speedMax] / 4;
+					if (_game.player[acc] < _game.player.speedMax) {
+						if (_game.player[acc] <= - _game.player.speedMax / 2) {
+							_game.player[acc] = _game.player.speedMax / 4;
 						} else {
-							_game.player[values.acceleration] += _game.player[values.speed];
+							_game.player[acc] += _game.player.speed;
 						}
 					} else {
-						_game.player[values.acceleration] = _game.player[values.speedMax];
+						_game.player[acc] = _game.player.speedMax;
 					}
 				}
+
 			},
 			processUserInput: function() {
-				_game.player.firstPerson = _events.mouse.pressed[_game.player.mouseButtons.aim];
+				var kP = _events.keyboard.pressed,
+					pl = _game.player,
+					cK = pl.controlKeys;
 
-				if (_events.keyboard.pressed[_game.player.controlKeys.run]) {
-					_game.player.speedMax = _game.player.defaultSpeedMax * 3;
-					_game.player.speed = _game.player.defaultSpeed * 3;
-				} else {
-					_game.player.speed = _game.player.defaultSpeed;
-					_game.player.speedMax = _game.player.defaultSpeedMax;
-				}
+				pl.speed	= pl.defaultSpeed	 * (kP[cK.run] ? 3 : 1);
+				pl.speedMax	= pl.defaultSpeedMax * (kP[cK.run] ? 3 : 1);
+				_game.timeSpeed = (kP[cK.master] || kP[cK.forward] ? 1 : kP[cK.backward] || kP[cK.left] || kP[cK.right] ? .2 : .1);
 
-				if (_events.keyboard.pressed[_game.player.controlKeys.forward]) {
-					_game.player.updateAcceleration (_game.player.playerAccelerationValues.position,  1);
-					_game.timeSpeed = 1.0;
-				} else
-					_game.timeSpeed = 0.1;
-
-				if (_events.keyboard.pressed[_game.player.controlKeys.jump])
-					_game.player.jump();
-
-				if (_events.keyboard.pressed[_game.player.controlKeys.backward])
-					_game.player.updateAcceleration (_game.player.playerAccelerationValues.position, -1);
-
-				if (_events.keyboard.pressed[_game.player.controlKeys.right])
-					_game.player.updateAcceleration (_game.player.playerAccelerationValues.rotation,  1);
-
-				if (_events.keyboard.pressed[_game.player.controlKeys.left])
-					_game.player.updateAcceleration (_game.player.playerAccelerationValues.rotation, -1);
-
-				if (_events.mouse.pressed[_game.player.mouseButtons.fire])
-					_game.player.fire();
-
-				if (_events.keyboard.pressed[_game.player.controlKeys.reload])
-					_game.player.reload();
+				if (kP[cK.forward])	 pl.updateAcceleration ("accelerationX",  1);
+				if (kP[cK.backward]) pl.updateAcceleration ("accelerationX", -1);
+				if (kP[cK.right])	 pl.updateAcceleration ("accelerationY",  1);
+				if (kP[cK.left])	 pl.updateAcceleration ("accelerationY", -1);
+				if (kP[cK.reload])	pl.reload();
+				if (kP[cK.jump])	pl.jump();
+				if (kP[cK.pause])	_ui.pause();
 			},
 			accelerate: function() {
-				// Calculate player coordinates by using current acceleration Euler radians from player's last rotation
-				_game.player.playerCoords = window.game.helpers.polarToCartesian (
-					_game.player.acceleration,
-					_game.player.rotationRadians.z
-				);
-
+			    var acc = (_game.player.accelerationX * _game.player.accelerationX + _game.player.accelerationY * _game.player.accelerationY);
+			    if (acc > _game.player.speedMax * _game.player.speedMax) {
+			    	var magnitude = Math.sqrt (acc);
+			    	_game.player.accelerationX *= _game.player.speedMax / magnitude;
+			    	_game.player.accelerationY *= _game.player.speedMax / magnitude;
+			    }
+			    var inputAcceleration = new THREE.Vector3 (_game.player.accelerationX, -_game.player.accelerationY, 0);
+				inputAcceleration.applyEuler (_game.player.controls.getEuler());
 				// Set actual XYZ velocity by using calculated Cartesian coordinates
 				_game.player.body.velocity.set (
-					_game.player.playerCoords.x,
-					_game.player.playerCoords.y,
+					inputAcceleration.x,
+					inputAcceleration.y,
 					_game.player.body.velocity.z
 				);
 
 				// Damping
 				if (!_events.keyboard.pressed[_game.player.controlKeys.forward] && !_events.keyboard.pressed[_game.player.controlKeys.backward])
-					_game.player.acceleration *= _game.player.damping;
+					_game.player.accelerationX *= _game.player.damping;
+
+				if (!_events.keyboard.pressed[_game.player.controlKeys.left] && !_events.keyboard.pressed[_game.player.controlKeys.right])
+					_game.player.accelerationY *= _game.player.damping;
 			},
 			rotate: function() {
 				// Rotate player around Z axis
@@ -313,51 +282,49 @@ window.game.core = function () {
 			fire: function() {
 				var shootVelo = 200;
 				if (_game.player.canFire) {
-					if(_game.bullets.length==20) {
-						_three.scene.remove(_game.bullets[0].visualref);
-						_cannon.world.remove(_game.bullets[0]);
-						_game.bullets.splice(0,1);
-					}
-                    var x = _game.player.body.position.x;
-                    var y = _game.player.body.position.y;
-                    var z = _game.player.body.position.z;
-                    var ballShape = new CANNON.Sphere(4);
-                    var material = new THREE.MeshLambertMaterial( { color: 0xdddddd } );
-                    
-                    
-                    var shootDirection = new THREE.Vector3();
-                    var vector = shootDirection;
-            		                    shootDirection.set(-1,0,0);
+				//	if (_game.bullets.length == 20) {
+				//		_three.scene.remove (_game.bullets[0].visualref);
+				//		_cannon.world.remove (_game.bullets[0]);
+				//		_game.bullets.splice (0, 1);
+				//	}
+					var x = _game.player.body.position.x;
+					var y = _game.player.body.position.y;
+					var z = _game.player.body.position.z;
+					var bulletShape = new CANNON.Sphere (1);
+					var material = new THREE.MeshLambertMaterial ({color: 0xdddddd});
 
-    	        	//vector.unproject(_three.camera);
-                	vector.applyQuaternion(_game.player.body.quaternion);
-                	var ray = new THREE.Ray(_game.player.body.position, vector.normalize() );
-               	 	shootDirection.x = ray.direction.x;
-                	shootDirection.y = ray.direction.y;
-                	shootDirection.z = ray.direction.z;
+					var shootDirection = new THREE.Vector3();
+					var vector = shootDirection;
+						shootDirection.set (0, 0, 1);
 
-                	 // Move the ball outside the player sphere
-                    x += shootDirection.x*4;
-                    y += shootDirection.y;
-                    z += shootDirection.z+10;
+					vector.unproject (_three.camera);
+					var ray = new THREE.Ray (_three.camera.position, vector.sub (_three.camera.position).normalize());
+			   	 	shootDirection.x = ray.direction.x;
+					shootDirection.y = ray.direction.y;
+					shootDirection.z = ray.direction.z;
+					// Move the bullet outside the player sphere
+					x += shootDirection.x;
+					y += shootDirection.y;
+					z += shootDirection.z;
 
-
-                    var ball = _cannon.createBody ({
-					shape: ballShape,
-					mass: 200,
-					position: new CANNON.Vec3 (x, y, z),
-					meshMaterial: material,
-					physicsMaterial: _cannon.solidMaterial
+					var bullet = _cannon.createBody ({
+						shape: bulletShape,
+						mass: 200,
+						position: new CANNON.Vec3 (x, y, z),
+						meshMaterial: material,
+						physicsMaterial: _cannon.solidMaterial
 					});
-					ball.collisionFilterGroup = _game.GROUP4;
-					ball.collisionFilterMask =  _game.GROUP1;
+					bullet.collisionFilterGroup = _game.GROUP4;
+					bullet.collisionFilterMask =  _game.GROUP1;
 
-					ball.velocity.set(  shootDirection.x * shootVelo,
-                                            shootDirection.y * shootVelo,
-                                            shootDirection.z * shootVelo);
-					}
-
-					_game.bullets.push(ball);
+					bullet.velocity.set (
+						shootDirection.x * shootVelo,
+						shootDirection.y * shootVelo,
+						shootDirection.z * shootVelo
+					);
+					_game.bullets.push (bullet);
+					_game.player.canFire = false;
+				}
 			},
 			updateOrientation: function() {
 				// Convert player's Quaternion to Euler radians and save them to _game.player.rotationRadians
@@ -385,9 +352,9 @@ window.game.core = function () {
 				if (Math.abs (poz) > 800 || reason) {
 					var rndR = window.game.helpers.random,
 						deRe = _game.deathReasons;
-					window.game.liv.deaths++;
+					_liv.deaths++;
 					switch (reason) {
-						case "trap":
+						case "trap": case "spikes": case "saw":
 						case "bullet":
 							if (rndR (0, 1, 1))
 								reason = deRe.collision[0];
@@ -409,10 +376,7 @@ window.game.core = function () {
 						break;
 					}
 					_ui.replaceText ("reason", reason);
-					if (!_ui.hasClass ("infoboxLost", "fade-in")) {
-						_ui.removeClass ("infoboxLost", "fade-out");
-						_ui.fadeIn ("infoboxLost");
-					}
+					_ui.fadeIn ("infoboxLost");
 					_game.destroy();
 				}
 			}
@@ -423,101 +387,245 @@ window.game.core = function () {
 			walls: [],
 			objects: [],
 			traps: [],
+			bullets: [],
 			create: function() {
 				// Create a solid material for all objects in the world
 				_cannon.solidMaterial = _cannon.createPhysicsMaterial (new CANNON.Material ("solidMaterial"), 0, 0.1);
 
-				var floorHeight = 20;
-
 				// Add a floor
-				_game.level.platform = _cannon.createBody ({
-					shape: new CANNON.Box (new CANNON.Vec3 (
-						window.game.static.floorSize,
-						window.game.static.floorSize,
-						floorHeight
-					)),
-					mass: 0,
-					position: new CANNON.Vec3 (0, 0, floorHeight / -2),
-					meshMaterial: new THREE.MeshLambertMaterial ({color: window.game.static.colors.dirt}),
-					physicsMaterial: _cannon.solidMaterial
-				});
-				//_game.level.platform.collisionFilterGroup = _game.GROUP1;
-				//_game.level.platform.collisionFilterMask =  _game.GROUP1 | _game.GROUP2 | _game.GROUP3 | _game.GROUP4;
+				_game.level.addWall (0, 0, _static.floorHeight / -2, _static.floorSize, _static.floorSize, _static.floorHeight, _static.colors.dirt);
+				_game.level.platform = _game.level.walls[0];
+			//	_game.level.platform.collisionFilterGroup = _game.GROUP1;
+			//	_game.level.platform.collisionFilterMask =  _game.GROUP1 | _game.GROUP2 | _game.GROUP3 | _game.GROUP4;
 
-				//Add a wall
-				_game.level.walls.push (_cannon.createBody ({
-					shape: new CANNON.Box (new CANNON.Vec3 (
-						window.game.static.floorSize,
-						floorHeight,
-						window.game.static.floorSize / 4
-					)),
-					mass: 0,
-					position: new CANNON.Vec3 (
-						0,
-						window.game.static.floorSize,
-						window.game.static.floorSize / 5
-					),
-					meshMaterial: new THREE.MeshLambertMaterial ({color: window.game.static.colors.green}),
-					physicsMaterial: _cannon.solidMaterial
-				}));
-				//Add some boxes
-				_game.level.traps.push (_cannon.createBody ({
-					shape: new CANNON.Box (new CANNON.Vec3 (30, 30, 30)),
-					mass: 5,
-					position: new CANNON.Vec3 (-240, -200, 90),
-					meshMaterial: new THREE.MeshLambertMaterial ({color: window.game.static.colors.red}),
-					physicsMaterial: _cannon.solidMaterial
-				}));
+				//Add walls
+				_game.level.addWall (0, -_static.floorSize, 60, _static.floorSize, _static.floorHeight, 50); // external W
+				_game.level.addWall (0,  _static.floorSize, 60, _static.floorSize, _static.floorHeight, 50); // external E
+				_game.level.addWall (-_static.floorSize, 0, 60, _static.floorHeight, _static.floorSize, 50); // external N
+			//	_game.level.addWall ( _static.floorSize, 0, 60, _static.floorHeight, _static.floorSize, 50); // external S
 
-				_game.level.traps.push (_cannon.createBody ({
-					shape: new CANNON.Box (new CANNON.Vec3 (30, 30, 30)),
-					mass: 5,
-					position: new CANNON.Vec3 (-300, -260, 55),
-					meshMaterial: new THREE.MeshLambertMaterial ({color: window.game.static.colors.red}),
-					physicsMaterial: _cannon.solidMaterial
-				}));
+				//Add traps
+				_game.level.addTrap (100,  100,   40, "saw", {towards: 'x'}).patrol (60);
+				_game.level.addTrap (-100, -100,  40, "saw", {towards: 'y'}).patrol (60);
+				_game.level.addTrap (-180, -200, 150, "spikes");
+				_game.level.addTrap (-120, -140, 210, "spikes");
+				_game.level.addTrap ( -60,  -80, 270, "spikes");
+				_game.level.addTrap(-200, 100, 40, "launcher");
+				_game.level.addTrap (200,100,40,"spikes");
 
-				_cannon.createBody ({
-					shape: new CANNON.Box (new CANNON.Vec3 (30, 30, 30)),
-					mass: 5,
-					position: new CANNON.Vec3 (-180, -200, 150),
-					meshMaterial: new THREE.MeshLambertMaterial ({color: window.game.static.colors.cyan}),
-					physicsMaterial: _cannon.solidMaterial
-				});
+				_game.intervals.push(setInterval(function(){
+					var t = _game.level.traps;
+					for(var i=0;i<t.length;i++)
+					{
+						if(t[i].body.tag == "launcher")
+							t[i].fire();
+					}
+					}, 1000));
+			},
+			addWall: function (_pX, _pY, _pZ, _sX, _sY, _sZ, _color = 0xdddddd) { // todo: merge this with 'addTrap'
+				if (typeof _pX != "undefined" && typeof _pY != "undefined" && typeof _pZ != "undefined")
+					_game.level.walls.push (_cannon.createBody ({
+						shape: new CANNON.Box (new CANNON.Vec3 (_sX || 10, _sY || 10, _sZ || 10)),
+						mass: 0,
+						position: new CANNON.Vec3 (_pX, _pY, _pZ),
+						meshMaterial: new THREE.MeshLambertMaterial ({color: _color}),
+						physicsMaterial: _cannon.solidMaterial
+					}));
+			},
+			addTrap: function (_pX, _pY, _pZ, _type, params = {}) {
+				if (_type && typeof _pX != "undefined" && typeof _pY != "undefined" && typeof _pZ != "undefined") {
+					/*	params:
+						* : color, wireframe, distance, towards
+						spikes : size {x, y, z}, mass
+						saw: radius
+						todo: change color to texture
+							if (typeof params.distance === "undefined") params.distance = 0;
+					*/
+					var _trap = {}, _position = new CANNON.Vec3 (_pX, _pY, _pZ);
+					if (typeof params.color == "undefined") params.color = _static.colors.red;
+					if (typeof params.wireframe == "undefined") params.wireframe = false;
+					if (typeof params.towards == "undefined") params.towards = 'x';
+					switch (_type) {
+						default: _type = "spikes"; case "spikes":
+							if (typeof params.size === "undefined") params.size = {x: 30, y: 30, z: 30}; else {
+								if (typeof params.size.x === "undefined") params.size.x = 30;
+								if (typeof params.size.y === "undefined") params.size.y = 30;
+								if (typeof params.size.z === "undefined") params.size.z = 30;
+							}
+							if (typeof params.mass === "undefined") params.mass = 5;
+							_trap.model = _three.createModel(window.game.models.spikes, 10, new THREE.MeshLambertMaterial ({
+									color: params.color,
+									wireframe: params.wireframe
+								}));
+							_trap.body = _cannon.createBody ({
+								shape: new CANNON.Box (_trap.model.halfExtents),
+								mass: params.mass,
+								position: _position,
+								physicsMaterial: _cannon.solidMaterial,
+								model: 1
+							});
+							_trap.mesh = _cannon.addVisual(_trap.body, null, _trap.model.mesh);
+						break;
 
-				_game.level.objects.push (_cannon.createBody ({
-					shape: new CANNON.Box (new CANNON.Vec3 (30, 30, 30)),
-					mass: 5,
-					position: new CANNON.Vec3 (-120, -140, 210),
-					meshMaterial: new THREE.MeshLambertMaterial ({color: window.game.static.colors.green}),
-					physicsMaterial: _cannon.solidMaterial
-				}));
+						case "saw":
+							if (typeof params.radius === "undefined" || typeof params.diameter === "undefined") params.diameter = 30;
+							_trap.model = _three.createModel(window.game.models.saw, 10, new THREE.MeshLambertMaterial ({
+									color: params.color,
+									wireframe: params.wireframe
+								}));
+							_trap.body = _cannon.createBody ({
+								shape: new CANNON.Cylinder (
+									params.diameter || params.radius * 2,
+									params.diameter || params.radius * 2,
+									2,	// height
+									32	// radiusSegments
+								),
+								mass: 5, // Body without mass can't have velocity; todo: fix this
+								position: _position,
+								meshMaterial: new THREE.MeshLambertMaterial ({
+									color: params.color,
+									wireframe: params.wireframe
+								}),
+								physicsMaterial: _cannon.solidMaterial,
+								model: 1
+							});
+							_trap.mesh = _cannon.addVisual(_trap.body, null, _trap.model.mesh);
+							switch (params.towards) {
+								case 'x':	_trap.body.quaternion = new CANNON.Quaternion (1, 0, 0, 1); break;
+								case 'y':	_trap.body.quaternion = new CANNON.Quaternion (0, 1, 0, 1); break;
+								// todo: add X+Y support
+							//	case "xy":	_trap.body.quaternion = new CANNON.Quaternion (1, 1, 0, 1); break;
+							}
+							_trap.body.quaternion.normalize();
+						break;
 
-				_cannon.createBody ({
-					shape: new CANNON.Box (new CANNON.Vec3 (30, 30, 30)),
-					mass: 5,
-					position: new CANNON.Vec3 (-60, -80, 270),
-					meshMaterial: new THREE.MeshLambertMaterial ({color: window.game.static.colors.cyan}),
-					physicsMaterial: _cannon.solidMaterial
-				});
+						case "launcher":
+							if (typeof params.size === "undefined") params.size = {x: 30, y: 30, z: 30}; else {
+									if (typeof params.size.x === "undefined") params.size.x = 30;
+									if (typeof params.size.y === "undefined") params.size.y = 30;
+									if (typeof params.size.z === "undefined") params.size.z = 30;
+								}
+							if (typeof params.mass === "undefined") params.mass = 0;
+							_trap.body = _cannon.createBody ({
+								shape: new CANNON.Box (new CANNON.Vec3 (params.size.x, params.size.y, params.size.z)),
+								mass: params.mass,
+								position: _position,
+								meshMaterial: new THREE.MeshLambertMaterial ({
+									color: params.color,
+									wireframe: params.wireframe
+								}),
+								physicsMaterial: _cannon.solidMaterial,
+							});
+						break;
+					}
 
-				for (var trapIndex = 0; trapIndex < _game.level.traps.length; trapIndex++)
-					_game.level.traps[trapIndex].tag = "trap";
+					_game.level.traps.push (_trap);
+					var thisTrap = _game.level.traps[_game.level.traps.length - 1];
+					thisTrap.body.tag = _type;
+					thisTrap.body.towards = params.towards;
+
+					_trap.fire = function  () {
+						var shootVelo = 100;
+				//	if (_game.bullets.length == 20) {
+				//		_three.scene.remove (_game.bullets[0].visualref);
+				//		_cannon.world.remove (_game.bullets[0]);
+				//		_game.bullets.splice (0, 1);
+				//	}
+					var x = _trap.body.position.x;
+					var y = _trap.body.position.y;
+					var z = _trap.body.position.z;
+					var bulletShape = new CANNON.Sphere (10);
+					var material = new THREE.MeshLambertMaterial ({color: _static.colors.red});
+
+					var shootDirection = new THREE.Vector3();
+					var vector = shootDirection;
+						shootDirection.set (1, 0, 0);
+
+					var ray = new THREE.Ray (_trap.position, vector.normalize());
+			   	 	shootDirection.x = ray.direction.x;
+					shootDirection.y = ray.direction.y;
+					shootDirection.z = ray.direction.z;
+					// Move the bullet outside the player sphere
+					x += shootDirection.x;
+					y += shootDirection.y;
+					z += shootDirection.z;
+
+					var bullet = _cannon.createBody ({
+						shape: bulletShape,
+						mass: 200,
+						position: new CANNON.Vec3 (x, y, z),
+						meshMaterial: material,
+						physicsMaterial: _cannon.solidMaterial
+					});
+
+					bullet.velocity.set (
+						shootDirection.x * shootVelo,
+						shootDirection.y * shootVelo,
+						shootDirection.z * shootVelo
+					);
+					bullet.tag = "bullet";
+					_game.level.bullets.push (bullet);	
+					};
+					
+					_trap.patrol = function (distance = 0) {
+						_trap.body.loc = {
+							// todo: preserve Z & X/Y/none
+							min: _trap.body.position[_trap.body.towards] - distance / 2,
+							max: _trap.body.position[_trap.body.towards] + distance / 2,
+							// todo: add X+Y support
+							// t[i].towards[0]
+							// t[i].towards[1]
+							dir: 1
+						};
+					};
+
+
+					return _trap;
+				}
+			},
+			animateTraps: function () {
+				var t = _game.level.traps;
+
+				for (var i = 0; i < t.length; i++) {if (t[i].body.loc) {
+					if(t[i].body.towards) {
+					// todo: preserve Z
+					t[i].body.velocity.set (0, 0, _cannon.gravity);
+					if (t[i].body.position[t[i].body.towards] >= t[i].body.loc.max || t[i].body.position[t[i].body.towards] <= t[i].body.loc.min) {
+						t[i].body.position[t[i].body.towards] = t[i].body.loc[(t[i].body.loc.dir > 0 ? "max" : "min")]; // little hack so the trap won't get stuck at min/max
+						t[i].body.loc.dir *= -1;
+					}
+					t[i].body.velocity[t[i].body.towards] = t[i].body.loc.dir * 100; // * _game.timeSpeed * _game.player.speed;
+					t[i].body.quaternion.set (0, 0, 0, 1);
+					t[i].body.quaternion[t[i].body.towards] = 1;
+					// todo: add X+Y support
+					// t[i].body.towards[0]
+					// t[i].body.towards[1]
+					t[i].body.quaternion.normalize();
+					}
+				}
+
 			}
+		}
+
+
+
 		},
 		init: function (options) {
-			// Setup necessary game components (_events, _three, _cannon, _ui)
+			// Setup necessary game components (_events, _three, _cannon, _ui, _static)
 			_game.initComponents (options);
 
 			_game.player.create();
 			_game.level.create();
 
+			_game.step();
 			_game.loop();
 		},
 		destroy: function() {
 			// Pause animation frame loop
 			window.cancelAnimationFrame (_animationFrameLoop);
-
+			for(var i=0; i<_game.intervals.length;i++) {
+				clearInterval(_game.intervals[i]);
+			}
 			// Destroy THREE.js scene and Cannon.js world and recreate them
 			_cannon.destroy();
 			_cannon.setup();
@@ -528,23 +636,27 @@ window.game.core = function () {
 			_game.player = window.game.helpers.cloneObject (_gameDefaults.player);
 			_game.level = window.game.helpers.cloneObject (_gameDefaults.level);
 
-			// Create player and level again
+			// Recreate player and level
 			_game.player.create();
 			_game.level.create();
 
-			// Continue with the game loop
+			_game.step();
 			_game.loop();
 		},
 		loop: function() {
 			// Assign an id to the animation frame loop
 			_animationFrameLoop = window.requestAnimationFrame (_game.loop);
 
-			// Update Cannon.js world and player state
-			_cannon.updatePhysics();
-			_game.player.update();
+			if (!_liv.paused)
+				_game.step();
 
 			// Render visual scene
 			_three.render();
+		},
+		step: function() {
+				_game.level.animateTraps();
+				_cannon.updatePhysics();
+				_game.player.update();
 		},
 		initComponents: function (options) {
 			// Reference game components one time
@@ -554,37 +666,37 @@ window.game.core = function () {
 			_ui = window.game.ui();
 
 			_three.setupLights = function () {
-				_three.scene.fog = new THREE.FogExp2 (window.game.static.colors.fog, .001);
+				_three.scene.fog = new THREE.FogExp2 (_static.colors.fog, .001);
 				var pSun = new THREE.DirectionalLight (
-					window.game.static.colors.sun, // color
+					_static.colors.sun, // color
 					1 // intensity
 				);
 				pSun.castShadow = true;
-				pSun.shadow.mapSize.width = window.game.static.floorSize * 5;
-				pSun.shadow.mapSize.height = window.game.static.floorSize * 5;
-				pSun.shadow.camera.top = window.game.static.floorSize * 2;
-				pSun.shadow.camera.right = window.game.static.floorSize * 2;
-				pSun.shadow.camera.left = window.game.static.floorSize * -2;
-				pSun.shadow.camera.bottom = window.game.static.floorSize * -2;
+				pSun.shadow.mapSize.width = _static.floorSize * 5;
+				pSun.shadow.mapSize.height = _static.floorSize * 5;
+				pSun.shadow.camera.top = _static.floorSize * 2;
+				pSun.shadow.camera.right = _static.floorSize * 2;
+				pSun.shadow.camera.left = _static.floorSize * -2;
+				pSun.shadow.camera.bottom = _static.floorSize * -2;
 				pSun.shadow.camera.near = 1;
-				pSun.shadow.camera.fov = window.game.static.floorSize / 3;
-				pSun.shadow.camera.far = window.game.static.floorSize * 2;
+				pSun.shadow.camera.fov = _static.floorSize / 3;
+				pSun.shadow.camera.far = _static.floorSize * 2;
 				pSun.position.set (
-					window.game.static.floorSize * 0.4,	// X
-					window.game.static.floorSize * 0.4,	// Z
-					window.game.static.floorSize		// Y
+					_static.floorSize * 0.4,	// X
+					_static.floorSize * 0.4,	// Z
+					_static.floorSize		// Y
 				);
 				_three.scene.add (pSun);
 				_three.scene.add (new THREE.CameraHelper (pSun.shadow.camera));
 
 				var cSun = new THREE.HemisphereLight (
-					window.game.static.colors.sky,
-					window.game.static.colors.dirt,
+					_static.colors.sky,
+					_static.colors.dirt,
 					.6 // intensity
 				);
 				cSun.position.set (
-					-window.game.static.floorSize,
-					-window.game.static.floorSize,
+					-_static.floorSize,
+					-_static.floorSize,
 					0
 				);
 				_three.scene.add (cSun);
@@ -601,12 +713,8 @@ window.game.core = function () {
 			_three.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 			_events.onMouseDown = function() {
-				if (!_ui.hasClass ("infoboxIntro", "fade-out"))
-					_ui.fadeOut ("infoboxIntro");
-				if (_ui.hasClass ("infoboxLost", "fade-in")) {
-					_ui.removeClass ("infoboxLost","fade-in");
+				if (_events.mouse.pressed[_game.player.mouseButtons.dismiss])
 					_ui.fadeOut ("infoboxLost");
-				}
 			};
 		}
 	};
@@ -615,6 +723,8 @@ window.game.core = function () {
 	var _three;
 	var _cannon;
 	var _ui;
+	var _static = window.game.static;
+	var _liv = window.game.liv;
 	var _animationFrameLoop;
 	// Game defaults which will be set one time after first start
 	var _gameDefaults = {

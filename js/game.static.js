@@ -3,9 +3,7 @@
  *
  * This file contains static constants that don't change
  */
-
 window.game = window.game || {};
-
 window.game.static = {
 	colors: {
 		black: 0x000000,
@@ -18,9 +16,11 @@ window.game.static = {
 		sun: 0xffffbb,
 		white: 0xffffff
 	},
-	floorSize: 400
+	floorSize: 400,
+	floorHeight: 20
 };
 
 window.game.liv = { // level-independent vars
+	paused: true,
 	deaths: 0
 };

@@ -3,11 +3,9 @@
  *
  * A class for the main THREE.js setup including camera, renderer and Cannon.js helpers
  */
-
 window.game = window.game || {};
-
 window.game.three = function() {
-	var _three = {
+	_three = {
 		// DOM container which will hold the final canvas element of THREE.js
 		domContainer: null,
 		// Camera size constraint to limit viewport e.g. for a user interface
@@ -60,7 +58,6 @@ window.game.three = function() {
 		setup: function () {
 			_three.scene = new THREE.Scene();
 
-			// Call lights setup method defined in game.core.js if existing
 			if (_three.setupLights)
 				_three.setupLights();
 		},
@@ -88,7 +85,6 @@ window.game.three = function() {
 			model.mesh = new THREE.Mesh (geometry, meshMaterial);
 
 			return model;
-
 		},
 		createModel: function (jsonData, scale, materials, isGeometry) {
 			// Variables for JSONLoader and imported model data

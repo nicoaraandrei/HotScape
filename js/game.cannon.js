@@ -67,9 +67,8 @@ window.game.cannon = function() {
 			for (var i = 0; i < _cannon.world.contacts.length; i++) {
 				var c = _cannon.world.contacts[i];
 
-				if ((c.bi === bodyA && c.bj === bodyB) || (c.bi === bodyB && c.bj === bodyA)) {
+				if ((c.bi === bodyA && c.bj === bodyB) || (c.bi === bodyB && c.bj === bodyA))
 					return true;
-				}
 			}
 			return false;
 		},
@@ -85,8 +84,7 @@ window.game.cannon = function() {
 				mass: options.mass,
 				shape: options.shape,
 				material: options.physicsMaterial
-			}
-			);
+			});
 			body.position.set (
 				options.position.x,
 				options.position.y,
@@ -94,10 +92,11 @@ window.game.cannon = function() {
 			);
 
 			// Apply a rotation if set by using Quaternions
-			if (options.rotation) {
+			if (options.rotation)
 				body.quaternion.setFromAxisAngle (options.rotation[0], options.rotation[1]);
-			}
+
 			// Add the entity to the scene and world
+			if(!options.model)
 			_cannon.addVisual (body, options.meshMaterial, options.customMesh);
 			return body;
 		},
@@ -106,11 +105,11 @@ window.game.cannon = function() {
 			var physicsMaterial = material || new CANNON.Material();
 			var contactMaterial = new CANNON.ContactMaterial (
 				physicsMaterial,
-				_cannon.playerPhysicsMaterial,{
-				friction: friction || _cannon.friction,
-				restitution: restitution || _cannon.restitution,
-				contactEquationRelaxation : 1000
-			}
+				_cannon.playerPhysicsMaterial, {
+					friction: friction || _cannon.friction,
+					restitution: restitution || _cannon.restitution,
+					contactEquationRelaxation : 1000
+				}
 			);
 
 			_cannon.world.addContactMaterial (contactMaterial);
@@ -140,7 +139,7 @@ window.game.cannon = function() {
 
 			return mesh;
 		},
-		removeVisual: function(body) {
+		removeVisual: function (body) {
 			// Remove an entity from the scene/world
 			if (body.visualref) {
 				var old_b = [];
@@ -201,9 +200,8 @@ window.game.cannon = function() {
 			}
 
 			// Perform a simulation step
-			//change the timestep for slowmo
-			//console.log(_game.timeSpeed);
-			_cannon.world.step (_cannon.timestep*_game.timeSpeed);
+			// change the timestep for slowmo
+			_cannon.world.step (_cannon.timestep * _game.timeSpeed);
 		},
 		shape2mesh: function (shape, currentMaterial) {
 			// Convert a given shape to a THREE.js mesh
@@ -211,15 +209,23 @@ window.game.cannon = function() {
 
 			switch (shape.type) {
 				case CANNON.Shape.types.SPHERE:
-					var sphere_geometry = new THREE.SphereGeometry (shape.radius, shape.wSeg, shape.hSeg);
-					mesh = new THREE.Mesh (sphere_geometry, currentMaterial);
+					mesh = new THREE.Mesh (
+						new THREE.SphereGeometry (
+							shape.radius,
+							shape.wSeg,
+							shape.hSeg
+						),
+						currentMaterial
+					);
 					break;
 
 				case CANNON.Shape.types.PLANE:
-					var geometry = new THREE.PlaneGeometry (100, 100);
 					mesh = new THREE.Object3D();
 					submesh = new THREE.Object3D();
-					var ground = new THREE.Mesh (geometry, currentMaterial);
+					var ground = new THREE.Mesh (
+						new THREE.PlaneGeometry (100, 100),
+						currentMaterial
+					);
 					ground.scale = new THREE.Vector3 (1000, 1000, 1000);
 					submesh.add (ground);
 
@@ -230,12 +236,14 @@ window.game.cannon = function() {
 					break;
 
 				case CANNON.Shape.types.BOX:
-					var box_geometry = new THREE.CubeGeometry (
-						shape.halfExtents.x * 2,
-						shape.halfExtents.y * 2,
-						shape.halfExtents.z * 2
+					mesh = new THREE.Mesh (
+						new THREE.CubeGeometry (
+							shape.halfExtents.x * 2,
+							shape.halfExtents.y * 2,
+							shape.halfExtents.z * 2
+						),
+						currentMaterial
 					);
-					mesh = new THREE.Mesh (box_geometry, currentMaterial);
 					mesh.castShadow = true;
 					mesh.receiveShadow = true;
 					break;
@@ -258,6 +266,24 @@ window.game.cannon = function() {
 						o3d.add (submesh);
 						mesh = o3d;
 					}
+					break;
+
+				case CANNON.Shape.types.CONVEXPOLYHEDRON:
+					var i, geo = new THREE.Geometry();
+					for (i = 0; i < shape.vertices.length; i++) { // add vertices
+						var v = shape.vertices[i];
+						geo.vertices.push (new THREE.Vector3 (v.x, v.y, v.z));
+					}
+					for (i = 0; i < shape.faces.length; i++) { // add shapes
+						var face = shape.faces[i];
+						for (var j = 1; j < face.length - 1; j++)
+							geo.faces.push (new THREE.Face3 (face[0], face[j], face[j + 1]));
+					}
+					geo.computeBoundingSphere();
+					geo.computeFaceNormals();
+					mesh = new THREE.Mesh (geo, currentMaterial);
+					mesh.castShadow = true;
+					mesh.receiveShadow = true;
 					break;
 
 				default:
@@ -336,12 +362,12 @@ window.game.cannon = function() {
 						if (b.aabbNeedsUpdate)
 							b.computeAABB();
 
-						if (isFinite(b.aabbmax.x) &&
-							isFinite(b.aabbmax.y) &&
-							isFinite(b.aabbmax.z) &&
-							isFinite(b.aabbmin.x) &&
-							isFinite(b.aabbmin.y) &&
-							isFinite(b.aabbmin.z) &&
+						if (isFinite (b.aabbmax.x) &&
+							isFinite (b.aabbmax.y) &&
+							isFinite (b.aabbmax.z) &&
+							isFinite (b.aabbmin.x) &&
+							isFinite (b.aabbmin.y) &&
+							isFinite (b.aabbmin.z) &&
 							b.aabbmax.x - b.aabbmin.x != 0 &&
 							b.aabbmax.y - b.aabbmin.y != 0 &&
 							b.aabbmax.z - b.aabbmin.z != 0) {

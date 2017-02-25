@@ -8,29 +8,26 @@
 	</head>
 	<body>
 		<div id="game"></div>
-
-		<div id="infoboxIntro" class="infobox">
-			<h2>Hotscape instructions</h2>
-			<p>You can control the player by using the following keys:</p>
-			<p>
-				W &rarr; Forward<br>
-				S &rarr; Backward<br>
-				A &rarr; Left<br>
-				D &rarr; Right<br>
-				R &rarr; Reload<br>
-				Space &rarr; Jump<br>
-				Shift &rarr; Run<br>
-				Left Click &rarr; Fire<br>
-				Right Click &rarr; Aim
-			</p>
-		</div>
-
-		<div id="infoboxLost" class="infobox">
-			<h2>You lost</h2>
-			<p>
-				Todo: Level stats here
-			</p>
-			<p id="reason"></p>
+		<img id="crosshair" src="assets/crosshair.png">
+		<div id="infoboxContainer">
+			<div id="infoboxIntro" class="infobox">
+				<span style="font-size: 40px">Hotscape instructions</span>
+				<br>
+				<br><span class="keys">W, A, S, D</span> &rarr; Move
+				<br><span class="keys">Space</span> &rarr; Jump
+				<br><span class="keys">Shift</span> &rarr; Run
+				<br><span class="keys">R</span> &rarr; Reload
+				<br><span class="keys">Left Click</span> &rarr; Fire
+				<br><span class="keys">Right Click</span> &rarr; Dismiss notifications
+				<br><span class="keys">Esc, P</span> &rarr; Pause
+				<br>
+				<br><span class="keys">Click anywhere to start</span>
+			</div>
+			<div id="infoboxLost" class="infobox">
+				<h2>You lost</h2>
+				<p id="levelStats"></p>
+				<p id="reason"></p>
+			</div>
 		</div>
 
 		<script src="lib/stats.min.js"></script>
@@ -38,7 +35,8 @@
 		<script src="lib/detector.js"></script>
 		<script src="lib/three.min.js"></script>
 		<script src="lib/cannon.js"></script>
-		<script src="lib/Projector.js"></script>
+		<script src="lib/PointerLockControls.js"></script>
+
 
 		<script src="js/game.static.js"></script>
 		<script src="js/game.three.js"></script>
@@ -47,7 +45,7 @@
 		<script src="js/game.helpers.js"></script>
 		<script src="js/game.ui.js"></script>
 		<script src="js/HotScape.js"></script>
-		<script src="js/game.models.js"></script> 
+		<script src="js/game.models.js"></script>
 
 		<script>
 			if (Detector.webgl) {
@@ -56,8 +54,10 @@
 					domContainer: document.querySelector ("#game"),
 					rendererClearColor: window.game.static.sky
 				});
-			} else
+			} else {
 				Detector.addGetWebGLMessage();
+				document.getElementById ("infoboxContainer").style.display = "none";
+			}
 
 			// STATS VIA MONKEY PATCH
 			(function() {
